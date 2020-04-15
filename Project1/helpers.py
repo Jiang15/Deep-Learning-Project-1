@@ -1,3 +1,8 @@
+import torch
+import matplotlib.pyplot as plt
+
+
+
 def calc_accuracy(model, data_loader, auxiliary_loss):
     correct = 0
     correct_digit = 0
