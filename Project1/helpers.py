@@ -74,6 +74,7 @@ def train(train_data_loader, test_data_loader,
                 loss.backward()
                 optimizer.step()
                 #             scheduler.step()
+                pbar.set_postfix(**{"loss (batch)": loss.item()})
                 pbar.update(100)
                 if step % test_every == 0:
                     losses.append(loss)
