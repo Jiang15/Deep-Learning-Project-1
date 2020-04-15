@@ -1,9 +1,6 @@
-
 from torch import nn
 from torch import optim
-
 from torch.utils.data import DataLoader
-
 from Project1.SiameseNet.model import Siamese
 from Project1.helpers import train, plot_train_info
 from dlc_practical_prologue import generate_pair_sets
@@ -37,7 +34,7 @@ train_info = train(train_loader, test_loader,
                      model = net,
                      optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay = reg),
                      criterion = cross_entropy, AL_weight = AL_weight,
-                     epochs = epochs, test_every = 5, auxiliary_loss = auxiliary_loss)
+                     epochs = epochs, test_every = 5, weight_sharing= False, auxiliary_loss = auxiliary_loss)
 
 reg = 0.001
 lr = 0.001# Add learning rate decay
@@ -53,7 +50,7 @@ train_info_WS = train(train_loader, test_loader,
                  model = net,
                  optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
                  criterion = cross_entropy, AL_weight = AL_weight,
-                 epochs = epochs, test_every=5, auxiliary_loss = auxiliary_loss)
+                 epochs = epochs, test_every=5, weight_sharing= True,  auxiliary_loss = auxiliary_loss)
 
 reg = 0.001
 lr = 0.001# Add learning rate decay
@@ -69,7 +66,7 @@ train_info_AL = train(train_loader, test_loader,
                          model = net,
                          optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
                          criterion = cross_entropy, AL_weight = AL_weight,
-                         epochs = epochs, test_every=5, auxiliary_loss = auxiliary_loss)
+                         epochs = epochs, test_every=5, weight_sharing=False, auxiliary_loss = auxiliary_loss)
 
 
 

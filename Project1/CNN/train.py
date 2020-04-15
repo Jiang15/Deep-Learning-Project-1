@@ -1,8 +1,6 @@
 from torch import nn
 from torch import optim
-
 from torch.utils.data import DataLoader
-
 from Project1.CNN.model import CNN
 from Project1.helpers import train, plot_train_info
 from dlc_practical_prologue import generate_pair_sets
