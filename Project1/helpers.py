@@ -97,15 +97,11 @@ def train(train_data_loader, test_data_loader,
                         accuracy_test.append(acc_test)
 
                     if accuracy_train_digit:
-                        pbar.set_postfix(**{"loss (batch)": loss.item(), "Train acccuracy": accuracy_train[-1],"Test accuracy:":accuracy_test[-1],
+                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],"test accuracy:":accuracy_test[-1],
                                             "train digit accuracy ":accuracy_train_digit[-1], "test digit accuracy ":accuracy_test_digit[-1]})
                     else:
-                        pbar.set_postfix(**{"loss (batch)": loss.item(), "Train acccuracy": accuracy_train[-1],"Test accuracy:":accuracy_test[-1]})
+                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],"test accuracy:":accuracy_test[-1]})
 
-                    #print(f"Epoch {epoch + 1}/{epochs}, Step {step}, loss {losses[-1]:0.4f},",
-                     #     f"train accuracy {accuracy_train[-1]}, test accuracy {accuracy_test[-1]}",
-                      #    f"train accuracy digit {accuracy_train_digit[-1]}, test accuracy digit {accuracy_test_digit[-1]}"
-                       #   if accuracy_train_digit else "")
 
     if auxiliary_loss:
         return accuracy_train, accuracy_test, losses, accuracy_train_digit, accuracy_test_digit
