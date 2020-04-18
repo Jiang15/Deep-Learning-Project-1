@@ -5,13 +5,13 @@ def normalization(x):
     return x
 
 
-def train():
+#def train():
 
 
-def accuracy():
+#def accuracy():
 
 
-def plot():
+#def plot():
 
 
 

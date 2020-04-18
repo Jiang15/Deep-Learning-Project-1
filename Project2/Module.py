@@ -8,8 +8,8 @@ class Module(object):
     def backward(self, *output):
         raise NotImplementedError
 
-    # def param(self):
-    # return []
+    def param(self):
+        return []
 
     def zero_grad(self):
         pass

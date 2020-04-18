@@ -51,6 +51,7 @@ class RCNN(nn.Module):
 
         self.layer1_aux = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
         self.FC_aux = nn.Linear(32 * 14 * 14, 10)
+
     def forward(self, x):
         input = x
         x = self.bn(self.relu(self.layer1(x)))

@@ -1,4 +1,7 @@
 import _ini_
+import torch
+
+
 class MSELoss(object):
     def __init__(self):
         super(MSELoss, self).__init__()
