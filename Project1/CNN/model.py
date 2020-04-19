@@ -16,6 +16,7 @@ import math
 class CNN(nn.Module):
     def __init__(self, input_channels, output_channels, auxiliary_loss):
         super().__init__()
+        self.auxiliary_loss = auxiliary_loss
         self.conv1 = nn.Conv2d(2, 32, 3)
         self.conv1_aux = nn.Conv2d(1, 32, 3)
 
@@ -40,7 +41,7 @@ class CNN(nn.Module):
         x = x.view(-1, 64 * 2 * 2)
         output = self.FC(x)
 
-        if auxiliary_loss:
+        if self.auxiliary_loss:
             y1 = torch.unsqueeze(input[:,0],dim=1)
             y2 = torch.unsqueeze(input[:,1],dim=1)
             y1 = self.dropout(self.subCNN_aux(y1))
