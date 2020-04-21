@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from Project1.CNN.model import CNN
 from Project1.helpers import train, plot_train_info
 from dlc_practical_prologue import generate_pair_sets
+import matplotlib.pyplot as plt
 
 from torchsummary import summary
 
@@ -48,3 +49,4 @@ train_info_AL = train(train_loader, test_loader,
 
 plot_train_info(train_info, False)
 plot_train_info(train_info_AL, True)
+plt.show()

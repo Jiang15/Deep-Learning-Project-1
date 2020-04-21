@@ -143,4 +143,4 @@ def plot_train_info(train_info, auxiliary_loss):
 
     fig.tight_layout()
     plt.grid()
-    plt.show()
+    # plt.show()

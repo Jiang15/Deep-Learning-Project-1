@@ -67,3 +67,4 @@ train_info_WS = train(train_loader, test_loader,
 plot_train_info(train_info, False)
 plot_train_info(train_info_WS, False)
 plot_train_info(train_info_AL, True)
+plt.show()
