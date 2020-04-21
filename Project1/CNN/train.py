@@ -19,12 +19,10 @@ nb_class = 2  # number of output classes
 
 cross_entropy = nn.CrossEntropyLoss()
 
-#     def predict(self, output_class):
-#         _, predicted_class = torch.max(output_class, 1)
-#         return predicted_class
+
 CNN_model = CNN(nb_channels, nb_class, auxiliary_loss=True)
 summary(CNN_model, input_size=(2, 14, 14))
-reg = 0.3
+reg = 0.35
 lr = 0.001  # Add learning rate decay
 epochs = 25
 auxiliary_loss = False
@@ -37,9 +35,7 @@ train_info = train(train_loader, test_loader,
                    criterion=cross_entropy, AL_weight=AL_weight,
                    epochs=epochs, test_every=5, auxiliary_loss=auxiliary_loss)
 
-# reg = 0.5
-# lr = 0.0005# Add learning rate decay
-# epochs = 25
+
 AL_weight = 0.5
 
 auxiliary_loss = True
