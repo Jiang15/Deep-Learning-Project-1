@@ -1,9 +1,12 @@
 import logging
-
 import torch
+from torch import nn
+from torch import optim
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+from dlc_practical_prologue import generate_pair_sets
+from torch.utils.data import DataLoader
+import numpy as np
 
 def calc_accuracy(model, data_loader, auxiliary_loss):
     correct = 0
@@ -31,8 +34,7 @@ def calc_accuracy(model, data_loader, auxiliary_loss):
 
 def train(train_data_loader, test_data_loader,
           model, optimizer, criterion, AL_weight=0.5,
-          epochs=10, test_every=1, weight_sharing = False, auxiliary_loss=False):
-
+          epochs=10, test_every=1, weight_sharing=False, auxiliary_loss=False):
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.info(f'''Starting training:
         Epochs:          {epochs}
@@ -68,7 +70,7 @@ def train(train_data_loader, test_data_loader,
                 else:
 
                     output = model(image)
-
+                    # print(output.shape)
                     loss = criterion(output, target)
 
                 loss.backward()
@@ -97,11 +99,13 @@ def train(train_data_loader, test_data_loader,
                         accuracy_test.append(acc_test)
 
                     if accuracy_train_digit:
-                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],"test accuracy:":accuracy_test[-1],
-                                            "train digit accuracy ":accuracy_train_digit[-1], "test digit accuracy ":accuracy_test_digit[-1]})
+                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],
+                                            "test accuracy:": accuracy_test[-1],
+                                            "train digit accuracy ": accuracy_train_digit[-1],
+                                            "test digit accuracy ": accuracy_test_digit[-1]})
                     else:
-                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],"test accuracy:":accuracy_test[-1]})
-
+                        pbar.set_postfix(**{"loss (batch)": loss.item(), "train acccuracy": accuracy_train[-1],
+                                            "test accuracy:": accuracy_test[-1]})
 
     if auxiliary_loss:
         return accuracy_train, accuracy_test, losses, accuracy_train_digit, accuracy_test_digit
@@ -144,3 +148,26 @@ def plot_train_info(train_info, auxiliary_loss):
     fig.tight_layout()
     plt.grid()
     # plt.show()
+
+
+def get_train_stats(net, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
+    train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
+    accuracy_trial_tr = []
+    accuracy_trial_te = []
+    for i in range(12): # 12 trials
+        # Data loaders
+        train_loader = DataLoader(list(zip(train_input, train_target, train_class)), batch_size, shuffle=True)
+        test_loader = DataLoader(list(zip(test_input, test_target, test_class)), batch_size, shuffle=True)
+        train_info = train(train_loader, test_loader,
+                           model=net,
+                           optimizer=optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
+                           criterion=criterion, AL_weight=AL_weight,
+                           epochs=epochs, test_every=test_every, weight_sharing=weight_sharing,
+                           auxiliary_loss=auxiliary_loss)
+        if auxiliary_loss:
+            accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info
+        else:
+            accuracy_train, accuracy_test, losses = train_info
+        accuracy_trial_tr.append(accuracy_train)
+        accuracy_trial_te.append(accuracy_test)
+    return np.mean(accuracy_trial_tr), np.std(accuracy_trial_tr), np.mean(accuracy_trial_te), np.std(accuracy_trial_te)
