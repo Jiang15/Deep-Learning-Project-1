@@ -150,10 +150,13 @@ def plot_train_info(train_info, auxiliary_loss):
     # plt.show()
 
 
-def get_train_stats(net, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
+def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
     accuracy_trial_tr = []
     accuracy_trial_te = []
+    nb_channels = 10
+    nb_class = 2
     for i in range(12): # 12 trials
+        net = model(nb_channels, nb_class, auxiliary_loss)
         train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
         # Data loaders
         train_loader = DataLoader(list(zip(train_input, train_target, train_class)), batch_size, shuffle=True)

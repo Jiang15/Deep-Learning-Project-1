@@ -27,8 +27,8 @@ auxiliary_loss = False
 weight_sharing = False
 
 AL_weight = 0.5  # 0.3 aux loss weight
-net = CNN(nb_channels, nb_class, auxiliary_loss)
-
+# net = CNN(nb_channels, nb_class, auxiliary_loss)
+model = CNN
 # net = CNN(nb_channels, nb_class, auxiliary_loss)
 # train_info = train(train_loader, test_loader,
 #                    model=net,
@@ -36,18 +36,19 @@ net = CNN(nb_channels, nb_class, auxiliary_loss)
 #                    criterion=cross_entropy, AL_weight=AL_weight,
 #                    epochs=epochs, test_every=5, auxiliary_loss=auxiliary_loss)
 
-mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te = get_train_stats(net, lr, reg, cross_entropy, AL_weight = AL_weight, epochs = 25, auxiliary_loss = auxiliary_loss)
+mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te = get_train_stats(model, lr, reg, cross_entropy, AL_weight = AL_weight, epochs = 25, auxiliary_loss = auxiliary_loss)
 print("Train Accuracy: Mean = ", mean_acc_tr, "STD =", std_acc_tr, "Test Accuracy: Mean = ", mean_acc_te, "STD =", std_acc_te)
 
 auxiliary_loss = True
-net = CNN(nb_channels, nb_class, auxiliary_loss)
+# net = CNN(nb_channels, nb_class, auxiliary_loss)
 # train_info_AL = train(train_loader, test_loader,
 #                       model=net,
 #                       optimizer=optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
 #                       criterion=cross_entropy, AL_weight=AL_weight,
 #                       epochs=epochs, test_every=5, auxiliary_loss=auxiliary_loss)
+model = CNN
 
-mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te = get_train_stats(net, lr, reg, cross_entropy, AL_weight = AL_weight, epochs = 25, auxiliary_loss = auxiliary_loss)
+mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te = get_train_stats(model, lr, reg, cross_entropy, AL_weight = AL_weight, epochs = 25, auxiliary_loss = auxiliary_loss)
 
 print("Train Accuracy: Mean = ", mean_acc_tr, "STD =", std_acc_tr, "Test Accuracy: Mean = ", mean_acc_te, "STD =", std_acc_te)
 
