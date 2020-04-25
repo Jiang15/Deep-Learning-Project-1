@@ -59,6 +59,7 @@ def train(train_data_loader, test_data_loader,
         step = 0
         with tqdm(total=1000, desc=f'Epoch {epoch + 1}/{epochs}', unit='img') as pbar:
             for (image, target, digit_target) in train_data_loader:
+                model.train()
                 step += 1
                 optimizer.zero_grad()
                 if auxiliary_loss:
@@ -113,7 +114,7 @@ def train(train_data_loader, test_data_loader,
         return accuracy_train, accuracy_test, losses
 
 
-def plot_train_info(train_info, auxiliary_loss):
+def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     if auxiliary_loss:
         accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info
     else:
@@ -125,19 +126,20 @@ def plot_train_info(train_info, auxiliary_loss):
     color_trd = 'tab:orange'
     color_ted = 'tab:purple'
     ax1.set_xlabel("Step")
+
     ax1.plot(range(len(accuracy_train)), accuracy_train, color=color_tr)
     ax1.plot(range(len(accuracy_test)), accuracy_test, color=color_te)
     if auxiliary_loss:
         ax1.plot(range(len(acc_train_digit)), acc_train_digit, color=color_trd)
         ax1.plot(range(len(acc_test_digit)), acc_test_digit, color=color_ted)
-        ax1.set_ylabel("Accuracy")
+        ax1.set_ylabel("Mean Accuracy Across Trials")
         ax1.legend(['Train - Green', 'Test-Blue', 'Train_Aux - Orange', 'Test_Aux - Purple'])
 
     else:
-        ax1.set_ylabel("Accuracy")
+        ax1.set_ylabel("Mean Accuracy Across Trials")
         ax1.legend(['Train - Green', 'Test-Blue'])
     ax1.tick_params(axis='y')
-
+    ax1.set_title("Weight Sharing: "+ str(weight_sharing) + " Auxiliary Loss: "+ str(auxiliary_loss))
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.legend(['Loss'])
     color_loss = 'tab:red'
@@ -153,10 +155,16 @@ def plot_train_info(train_info, auxiliary_loss):
 def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
     accuracy_trial_tr = []
     accuracy_trial_te = []
-    nb_channels = 10
+    mean_acc_tr = []
+    mean_acc_te = []
+    mean_acc_aux_tr = []
+    mean_acc_aux_te = []
+    mean_losses = []
+    train_info_mean = []
+    nb_channels = 2
     nb_class = 2
-    for i in range(12): # 12 trials
-        net = model(nb_channels, nb_class, auxiliary_loss)
+    for i in range(3): # 3 trials for now, change to 10+ for report
+        net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
         train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
         # Data loaders
         train_loader = DataLoader(list(zip(train_input, train_target, train_class)), batch_size, shuffle=True)
@@ -169,8 +177,24 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
                            auxiliary_loss=auxiliary_loss)
         if auxiliary_loss:
             accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info
+            mean_acc_aux_tr.append(acc_train_digit)
+            mean_acc_aux_te.append(acc_test_digit)
         else:
             accuracy_train, accuracy_test, losses = train_info
-        accuracy_trial_tr.append(accuracy_train)
-        accuracy_trial_te.append(accuracy_test)
-    return np.mean(accuracy_trial_tr), np.std(accuracy_trial_tr), np.mean(accuracy_trial_te), np.std(accuracy_trial_te)
+        mean_acc_tr.append(accuracy_train)
+        mean_acc_te.append(accuracy_test)
+        mean_losses.append(losses)
+        accuracy_trial_tr.append(accuracy_train[-1])
+        accuracy_trial_te.append(accuracy_test[-1])
+    if auxiliary_loss:
+        train_info_mean.append(np.mean(mean_acc_tr,0))
+        train_info_mean.append(np.mean(mean_acc_te,0))
+        train_info_mean.append(np.mean(mean_losses,0))
+        train_info_mean.append(np.mean(mean_acc_aux_tr,0))
+        train_info_mean.append(np.mean(mean_acc_aux_te,0))
+    else:
+        train_info_mean.append(np.mean(mean_acc_tr,0))
+        train_info_mean.append(np.mean(mean_acc_te,0))
+        train_info_mean.append(np.mean(mean_losses,0))
+
+    return np.mean(accuracy_trial_tr), np.std(accuracy_trial_tr), np.mean(accuracy_trial_te), np.std(accuracy_trial_te), train_info_mean

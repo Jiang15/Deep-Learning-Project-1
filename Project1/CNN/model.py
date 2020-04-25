@@ -14,8 +14,9 @@ import math
 
 
 class CNN(nn.Module):
-    def __init__(self, input_channels, output_channels, auxiliary_loss):
+    def __init__(self, input_channels, output_channels, weight_sharing, auxiliary_loss):
         super().__init__()
+        self.weight_sharing = weight_sharing
         self.auxiliary_loss = auxiliary_loss
         self.conv1 = nn.Conv2d(2, 32, 3)
         self.conv1_aux = nn.Conv2d(1, 32, 3)

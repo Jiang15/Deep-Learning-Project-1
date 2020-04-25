@@ -14,17 +14,16 @@ class RCL(nn.Module):
         self.bn = nn.ModuleList([nn.BatchNorm2d(K) for i in range(steps)])
         self.relu = nn.ReLU(inplace=True)
         self.steps = steps
-        self.input = nn.Conv2d(K, K, kernel_size=3, stride=1, padding=1, bias=False)
+        self.recurr = nn.Conv2d(K, K, kernel_size=3, stride=1, padding=1, bias=False)
 
     def forward(self, x):
-#         rx = self.input(x)
         rx = x
         for i in range(self.steps):
             if i == 0:
                 x = self.conv(x)
             else:
                 if self.weight_sharing_recurr:
-                    x = self.conv(x) + rx#self.input(rx)
+                    x = self.conv(x) + self.recurr(rx)
                 else:
                     x = self.convList[i](x)
             x = self.relu(x)
@@ -34,7 +33,7 @@ class RCL(nn.Module):
 
 
 class RCNN(nn.Module):
-    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 32, steps = 2):
+    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 64, steps = 2):
         super(RCNN, self).__init__()
         self.weight_sharing_recurr = weight_sharing_recurr
         self.auxiliary_loss = auxiliary_loss
@@ -50,7 +49,7 @@ class RCNN(nn.Module):
         self.dropout = nn.Dropout(p=0.3)
 
         self.layer1_aux = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
-        self.FC_aux = nn.Linear(32 * 14 * 14, 10)
+        self.FC_aux = nn.Linear(self.K * 14 * 14, 10)
 
     def forward(self, x):
         input = x
@@ -58,6 +57,7 @@ class RCNN(nn.Module):
         x = self.pooling(x)
         x = self.dropout(x)
         x = self.layer2(x)
+        x = self.dropout(x)
         x = self.layer3(x)
         x = F.max_pool2d(x, x.shape[-1])
         x = x.view(-1, self.K)
@@ -70,8 +70,8 @@ class RCNN(nn.Module):
             y2 = self.bn(self.relu(self.layer1_aux(y2)))
             y1 = self.layer2(y1)
             y2 = self.layer2(y2)
-            y1 = y1.view(-1, 32 * 14 * 14)
-            y2 = y2.view(-1, 32 * 14 * 14)
+            y1 = y1.view(-1, self.K * 14 * 14)
+            y2 = y2.view(-1, self.K * 14 * 14)
             y1 = self.FC_aux(y1)
             y2 = self.FC_aux(y2)
             return y1, y2, x
