@@ -34,7 +34,7 @@ def calc_accuracy(model, data_loader, auxiliary_loss):
 
 def train(train_data_loader, test_data_loader,
           model, optimizer, criterion, AL_weight=0.5,
-          epochs=10, test_every=1, weight_sharing=False, auxiliary_loss=False):
+          epochs=10, test_every=1, gamma = 0, weight_sharing=False, auxiliary_loss=False):
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.info(f'''Starting training:
         Epochs:          {epochs}
@@ -53,7 +53,8 @@ def train(train_data_loader, test_data_loader,
     accuracy_train_digit = []
     accuracy_test_digit = []
 
-    #     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
+    if gamma != 0:
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=gamma)
 
     for epoch in range(epochs):
         step = 0
@@ -76,7 +77,8 @@ def train(train_data_loader, test_data_loader,
 
                 loss.backward()
                 optimizer.step()
-                #             scheduler.step()
+                if gamma != 0:
+                    scheduler.step()
                 pbar.set_postfix(**{"loss (batch)": loss.item()})
                 pbar.update(100)
                 if step % test_every == 0:
@@ -152,7 +154,7 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     # plt.show()
 
 
-def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
+def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, gamma = 0, weight_sharing = False, auxiliary_loss = False):
     accuracy_trial_tr = []
     accuracy_trial_te = []
     mean_acc_tr = []
@@ -173,7 +175,8 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
                            model=net,
                            optimizer=optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
                            criterion=criterion, AL_weight=AL_weight,
-                           epochs=epochs, test_every=test_every, weight_sharing=weight_sharing,
+                           epochs=epochs, test_every=test_every, gamma = gamma,
+                           weight_sharing=weight_sharing,
                            auxiliary_loss=auxiliary_loss)
         if auxiliary_loss:
             accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info

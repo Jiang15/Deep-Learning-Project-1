@@ -33,7 +33,7 @@ class RCL(nn.Module):
 
 
 class RCNN(nn.Module):
-    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 64, steps = 2):
+    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 32, steps = 2):
         super(RCNN, self).__init__()
         self.weight_sharing_recurr = weight_sharing_recurr
         self.auxiliary_loss = auxiliary_loss
