@@ -77,3 +77,49 @@ class RCNN(nn.Module):
             return y1, y2, x
         else:
             return x
+
+
+class RCNN2(nn.Module):
+    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 32, steps = 2):
+        super(RCNN2, self).__init__()
+        self.weight_sharing_recurr = weight_sharing_recurr
+        self.auxiliary_loss = auxiliary_loss
+        self.K = K
+
+        self.layer1 = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
+        self.relu = nn.ReLU()
+        self.bn = nn.BatchNorm2d(K)
+        self.pooling = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1)
+        self.layer2 = RCL(weight_sharing_recurr, K, steps=steps)
+        self.layer3 = RCL(weight_sharing_recurr, K, steps=steps)
+        self.fc = nn.Linear(K, num_classes, bias = True)
+        self.dropout = nn.Dropout(p=0.3)
+        self.FC_aux = nn.Linear(self.K * 7 * 7, 10)
+
+    def forward(self, x):
+        x1 = torch.unsqueeze(x[:,0],dim=1)
+        x2 = torch.unsqueeze(x[:,1],dim=1)
+        x1 = self.bn(self.relu(self.layer1(x1)))
+        x2 = self.bn(self.relu(self.layer1(x2)))
+        x1 = self.pooling(x1)
+        x2 = self.pooling(x2)
+        x1 = self.dropout(x1)
+        x2 = self.dropout(x2)
+        x1 = self.layer2(x1)
+        x1 = self.layer2(x1)
+        x1 = self.dropout(x1)
+        x2 = self.dropout(x2)
+        x = x1 + x2
+        x = self.layer3(x)
+        x = F.max_pool2d(x, x.shape[-1])
+        x = x.view(-1, self.K)
+        x = self.dropout(x)
+        x = self.fc(x)
+        if self.auxiliary_loss:
+            y1 = x1.view(-1, self.K * 7 * 7)
+            y2 = x2.view(-1, self.K * 7 * 7)
+            y1 = self.FC_aux(y1)
+            y2 = self.FC_aux(y2)
+            return y1, y2, x
+        else:
+            return x

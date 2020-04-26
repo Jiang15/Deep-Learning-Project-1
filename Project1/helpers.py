@@ -77,7 +77,7 @@ def train(train_data_loader, test_data_loader,
 
                 loss.backward()
                 optimizer.step()
-                if gamma != 0:
+                if gamma != 0 and epoch > 5:
                     scheduler.step()
                 pbar.set_postfix(**{"loss (batch)": loss.item()})
                 pbar.update(100)
@@ -165,7 +165,7 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
     train_info_mean = []
     nb_channels = 2
     nb_class = 2
-    for i in range(3): # 3 trials for now, change to 10+ for report
+    for i in range(10): # 3 trials for now, change to 10+ for report
         net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
         train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
         # Data loaders
