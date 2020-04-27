@@ -21,11 +21,11 @@ cross_entropy = nn.CrossEntropyLoss()
 CNN_model = CNN(nb_channels, nb_class, weight_sharing=True, auxiliary_loss=True)
 summary(CNN_model, input_size=(2, 14, 14))
 
-reg = 0.05
-lr = 0.001  # 0.001 Add learning rate decay
+reg = [0,0]
+lr = [0.005,0.005]  # 0.001 Add learning rate decay
 epochs = 25
-AL_weight = 0.5  # 0.3 aux loss weight
-
+AL_weight = 0.1  # 0.3 aux loss weight
+gamma = [0,0]
 model = CNN
 
 auxiliary_loss = [False,True]
@@ -39,7 +39,7 @@ std_te = []
 
 
 for i in range(len(auxiliary_loss)):
-    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr, reg, cross_entropy, AL_weight = AL_weight, epochs = epochs, weight_sharing = False, auxiliary_loss = auxiliary_loss[i])
+    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs,  gamma = gamma[i], weight_sharing = False, auxiliary_loss = auxiliary_loss[i])
     plot_train_info(train_info_mean, weight_sharing = False, auxiliary_loss = auxiliary_loss[i])
     mean_tr.append(mean_acc_tr)
     mean_te.append(mean_acc_te)

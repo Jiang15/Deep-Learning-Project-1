@@ -18,16 +18,14 @@ RNN_model = RCNN(nb_channels, nb_class,True, True, K = 32)
 summary(RNN_model, input_size=(2, 14, 14))
 RNN_model = RCNN(nb_channels, nb_class,False, False, K = 32)
 summary(RNN_model, input_size=(2, 14, 14))
-# False False optimal
-# reg = [0] #0.025 0.02 0.04 0.015
-# lr = [0.01]# 0.005 0.001 0.003
-# epochs = 25
-# gamma = [0.001]
 
 reg = [0.01,0.01,0,0]
 lr = [0.009,0.01,0.015,0.01]
 epochs = 25
 gamma = [0.05, 0.05, 0.001, 0.001]
+
+
+
 
 mean_tr = []
 mean_te = []
@@ -36,8 +34,8 @@ std_te = []
 
 
 
-weight_sharing_recurr = [False, True, False, True]
-auxiliary_loss = [False, False, True, True]
+weight_sharing_recurr = [True] #[False, True, False, True]
+auxiliary_loss = [True]#[False, False, True, True]
 
 # optimal with aux loss
 # reg = 0
