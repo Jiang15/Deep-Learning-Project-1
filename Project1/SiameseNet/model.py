@@ -11,10 +11,10 @@ class Siamese(nn.Module):
         self.auxiliary_loss = auxiliary_loss
         #self.fc6 = nn.Linear(10*2, 2)
 
-        self.CNNnet1 = nn.Sequential(nn.Conv2d(1, 32, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.3), nn.Conv2d(32, 64, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.3))
-        self.CNNnet2 = nn.Sequential(nn.Conv2d(1, 32, 3), nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.3), nn.Conv2d(32, 64, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.3))
-        self.FCnet1 = nn.Sequential(nn.Linear(64 * 2 * 2, 50), nn.ReLU(), nn.Linear(50, 10))
-        self.FCnet2 = nn.Sequential(nn.Linear(64 * 2 * 2, 50), nn.ReLU(), nn.Linear(50, 10))
+        self.CNNnet1 = nn.Sequential(nn.Conv2d(1, 32, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.5), nn.Conv2d(32, 64, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.5))
+        self.CNNnet2 = nn.Sequential(nn.Conv2d(1, 32, 3), nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.5), nn.Conv2d(32, 64, 3),  nn.ReLU(), nn.MaxPool2d(2,2), nn.Dropout2d(0.5))
+        self.FCnet1 = nn.Sequential(nn.Linear(64 * 2 * 2, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(),  nn.Linear(64, 10))
+        self.FCnet2 = nn.Sequential(nn.Linear(64 * 2 * 2, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(),  nn.Linear(64, 10))
         #self.combine = nn.Sequential(nn.Linear(64*2*2*2, 100), nn.ReLU(), nn.Linear(100, 25), nn.ReLU(), nn.Linear(25, 2))
         self.combine = nn.Sequential(nn.ReLU(), nn.Linear(10*2, 2))
 
@@ -43,7 +43,6 @@ class Siamese(nn.Module):
         #y = y.view(-1, 64*2*2*2)
         y = y.view(-1, 2*10)
         y = self.combine(y)
-
         if self.auxiliary_loss == True:
             return y1, y2, y
         else:

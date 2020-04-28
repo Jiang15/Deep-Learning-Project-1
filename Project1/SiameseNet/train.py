@@ -22,15 +22,11 @@ cross_entropy = nn.CrossEntropyLoss()
 
 reg = 0.001
 lr = 0.001# Add learning rate decay
-epochs = 23
-weight_sharing_CNN = False
-weight_sharing_FC = False
-auxiliary_loss = False
-AL_weight = 1
+epochs = 25
 weight_sharing_CNN = False
 weight_sharing_FC = False
 auxiliary_loss = True
-
+AL_weight = 0.7
 
 net = Siamese(nb_channels, nb_class, weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
 
@@ -38,20 +34,7 @@ train_info_AL = train(train_loader, test_loader,
                          model = net,
                          optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
                          criterion = cross_entropy, AL_weight = AL_weight,
-                         epochs = epochs, test_every=5, weight_sharing=False, auxiliary_loss = auxiliary_loss)
-
-
-
-
-net = Siamese(nb_channels, nb_class, weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
-
-train_info = train(train_loader, test_loader,
-                     model = net,
-                     optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay = reg),
-                     criterion = cross_entropy, AL_weight = AL_weight,
-                     epochs = epochs, test_every = 5, weight_sharing= False, auxiliary_loss = auxiliary_loss)
-
-
+                         epochs = epochs, test_every=5, weight_sharing=True, auxiliary_loss = auxiliary_loss)
 weight_sharing_CNN = True
 weight_sharing_FC = True
 auxiliary_loss = False
@@ -64,7 +47,20 @@ train_info_WS = train(train_loader, test_loader,
                  criterion = cross_entropy, AL_weight = AL_weight,
                  epochs = epochs, test_every=5, weight_sharing= True,  auxiliary_loss = auxiliary_loss)
 
+weight_sharing_CNN = False
+weight_sharing_FC = False
+auxiliary_loss = False
+net = Siamese(nb_channels, nb_class, weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
+
+train_info = train(train_loader, test_loader,
+                     model = net,
+                     optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay = reg),
+                     criterion = cross_entropy, AL_weight = AL_weight,
+                     epochs = epochs, test_every = 5, weight_sharing= False, auxiliary_loss = auxiliary_loss)
+
+
+
+
 plot_train_info(train_info, False)
 plot_train_info(train_info_WS, False)
 plot_train_info(train_info_AL, True)
-plt.show()
