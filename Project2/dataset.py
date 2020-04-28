@@ -2,6 +2,8 @@ import math
 from torch import empty,set_grad_enabled
 from matplotlib import pyplot as plt
 
+
+
 set_grad_enabled(False)
 
 
@@ -24,6 +26,4 @@ plt.xlabel('x position of data points')
 plt.ylabel('y position of data points')
 plt.title('Datapoints')
 plt.show()
-
-
 

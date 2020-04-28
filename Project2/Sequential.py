@@ -1,4 +1,4 @@
-
+import torch
 
 
 class Sequential(object):
@@ -22,3 +22,7 @@ class Sequential(object):
         for layer in self.layers:
             out_param.append(layer.param())
         return out_param
+
+    def zero_grad(self):
+        for layer in self.layers:
+            layer.zero_grad()

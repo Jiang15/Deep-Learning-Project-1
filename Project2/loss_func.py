@@ -1,19 +1,21 @@
 import _ini_
 import torch
 
+from Project2.Module import Module
 
-class MSELoss(object):
+
+class MSELoss(Module):
     def __init__(self):
-        super(MSELoss, self).__init__()
-
-    def loss(self, y, y_pred):
-        y = y.view(y_pred.size())
-        loss = (y - y_pred).pow(2).sum()
+        super(MSELoss,self).__init__()
+        self.input=0
+    def forward(self,output, target):
+        output = output.view(target.size())
+        loss= ((output-target)**2).mean()
         return loss
 
-    def grad(self, y, y_pred):
-        y = y.view(y_pred.size())
-        grad = 2 * (y - y_pred)
+    def backward(self,output,target):
+        output = output.view(target.size())
+        grad=2*(output-target)/output.numel()
         return grad
 
 
