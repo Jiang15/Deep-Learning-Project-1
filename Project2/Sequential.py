@@ -1,28 +1,26 @@
-import torch
+from Project2.Module import Module
 
 
-class Sequential(object):
-    def __init__(self, layers):
+class Sequential(Module):
+    def __init__(self,*layers):
+        super(Sequential,self).__init__()
         self.layers = layers
-
-    def forward(self, input):
-        input_layer = input
+    def forward(self,x):
         for layer in self.layers:
-            input_layer = layer.forward(input_layer)
-        return input_layer
-
-    def backward(self, output):
-        output_layer = output
-        for layer in reversed(self.layers):
-            output_layer = layer.backward(output_layer)
-        return output_layer
-
-    def param(self):
-        out_param =[]
-        for layer in self.layers:
-            out_param.append(layer.param())
-        return out_param
-
+            x = layer.forward(x)
+        return x
+    def backward(self, grad):
+        output = grad
+        for layer in  reversed(self.layers):
+            output_layer = layer.backward(output)
+            output= output_layer
     def zero_grad(self):
         for layer in self.layers:
             layer.zero_grad()
+    def param(self):
+        parameter = []
+        for layer in self.layers:
+            param = layer.param()
+            for p in param:
+                parameter.append(p)
+        return parameter

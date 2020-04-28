@@ -1,3 +1,6 @@
+import torch
+
+
 class Module(object):
     def _init_(self):
         self.module = 0
@@ -33,3 +36,8 @@ class Module(object):
         #     if p.grad is not None:
         #         p.grad.detach_()
         #         p.grad.zero_()
+class Parameters(Module):
+    def __init__(self,value):
+        super(Parameters,self).__init__()
+        self.value = value
+        self.grad = torch.zeros_like(self.value)

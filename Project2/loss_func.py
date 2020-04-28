@@ -18,7 +18,6 @@ class MSELoss(Module):
         grad=2*(output-target)/output.numel()
         return grad
 
-
 class BCELoss(object):
     def __init__(self):
         super(BCELoss, self).__init__()
