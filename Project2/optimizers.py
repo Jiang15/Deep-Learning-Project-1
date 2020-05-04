@@ -1,6 +1,6 @@
 import _ini_
 
-class SGD1(object):
+class SGD(object):
     def __init__(self, parameters ,lr):
         self.lr = lr
         self.parameters = parameters

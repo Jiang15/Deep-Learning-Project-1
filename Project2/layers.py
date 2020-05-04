@@ -1,5 +1,5 @@
-from distributed.protocol.tests.test_torch import torch
-
+# from distributed.protocol.tests.test_torch import torch
+import torch
 from Project2.Module import Module, Parameters
 import numpy as np
 
