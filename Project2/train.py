@@ -3,7 +3,7 @@ import math
 import torch
 
 from Project2.dataset import generate_disc_set
-from Project2.layers import Linear,  Relu
+from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu
 from Project2.loss_func import MSELoss
 from Project2.optimizers import  SGD
 from Project2.Sequential import Sequential
@@ -73,10 +73,9 @@ def cross_validation(k_fold, lr_set, input, target):
     acc_te_set = []
 #     min_loss_te = float('inf')
     max_acc_te = 0.
-
+    model = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
     best_lr = 0
     for lr in lr_set:
-        model = Sequential(Linear(2,25),Relu(),Linear(25,50),Relu(),Linear(50,25), Relu(),Linear(25,2))
         optimizer = SGD(parameters = model.param(), lr = lr.item())
         loss_tr = 0
         loss_te = 0
@@ -108,17 +107,32 @@ def cross_validation(k_fold, lr_set, input, target):
 # lr cross validation (find a way to pass model in the function and allow it to reinitialize in the for loop?)
 lr_set = torch.logspace(-2, 0.01, 20)
 k_fold = 10
-best_lr, loss_tr_set, loss_te_set, acc_tr_set, acc_te_set = cross_validation(k_fold,lr_set, train_input,train_target)
-print(best_lr)
-plotLossAcc(loss_tr_set, loss_te_set, acc_tr_set, acc_te_set, lr_set, "Learning Rate")
 # plt.show()
 
 # Train with best lr found
-model = Sequential(Linear(2,25),Relu(),Linear(25,50),Relu(),Linear(50,25), Relu(),Linear(25,2))
+model = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
 loss = MSELoss()
+best_lr, loss_tr_set, loss_te_set, acc_tr_set, acc_te_set = cross_validation(k_fold,lr_set, train_input,train_target)
+print(best_lr)
+optimizer = SGD(parameters = model.param(), lr = best_lr)
+plotLossAcc(loss_tr_set, loss_te_set, acc_tr_set, acc_te_set, lr_set, "Learning Rate")
+
 nb_epochs = 50
 batch_size = 50
+loss_train,loss_test, acc_train, acc_test =train(model,loss,optimizer,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)
+epochs = torch.arange(nb_epochs)
+plotLossAcc(loss_train, loss_test, acc_train, acc_test, epochs, "Epochs")
+plt.show()
+
+model = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), Tanh(),Linear(25,2))
+loss = MSELoss()
+best_lr, loss_tr_set, loss_te_set, acc_tr_set, acc_te_set = cross_validation(k_fold,lr_set, train_input,train_target)
+print(best_lr)
 optimizer = SGD(parameters = model.param(), lr = best_lr)
+plotLossAcc(loss_tr_set, loss_te_set, acc_tr_set, acc_te_set, lr_set, "Learning Rate")
+nb_epochs = 50
+batch_size = 50
+
 loss_train,loss_test, acc_train, acc_test =train(model,loss,optimizer,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)
 epochs = torch.arange(nb_epochs)
 plotLossAcc(loss_train, loss_test, acc_train, acc_test, epochs, "Epochs")

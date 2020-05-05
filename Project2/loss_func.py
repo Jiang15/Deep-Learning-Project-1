@@ -30,3 +30,26 @@ class BCELoss(object):
     def grad(self, y, y_pred):
         grad = -y_pred / y - (1 - y_pred) * (-1 / (1 - torch.sigmoid(y))) * (torch.exp(-y) / (1 + torch.exp(-y)) ** 2)
         return grad
+
+class SGD():
+    '''
+    stochastic gradient descent optimizer
+    '''
+    def __init__(self, lr, model):
+        '''
+        initialize the optimizer
+        :param lr: learning rate
+        :param model: the model to be optimized
+        '''
+        self.lr = lr
+        self.model = model
+
+    def step(self):
+        '''
+        update parameters with corresponding gradients
+        '''
+        for m in self.model.modules:
+            if m.param()!=[]:
+                m.weight -= self.lr * m.weight_grad
+                if m.ifbias:
+                    m.bias -= self.lr * m.bias_grad
