@@ -1,5 +1,5 @@
 from torch import nn
-from Project1.RCNN.model import CNN, RCNN2
+from Project1.RCNN.model import CNN, CNN2
 from Project1.helpers import plot_train_info, get_train_stats
 from torchsummary import summary
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 # Data loaders
-batch_size = 1
+batch_size = 100
 nb_channels = 2 # input channel
 nb_digits = 10 # number of digit classes
 nb_class = 2 # number of output classes
@@ -19,12 +19,10 @@ summary(RNN_model, input_size=(2, 14, 14))
 RNN_model = CNN(nb_channels, nb_class,True, False, K = 32)
 summary(RNN_model, input_size=(2, 14, 14))
 
-# reg = [0.01,0.01,0,0]
-# lr = [0.009,0.01,0.015,0.01]
+# reg = [0.04,0.06,0,0]
+# lr = [0.006,0.006,0.015,0.01]
 # epochs = 25
-# gamma = [0.05, 0.05, 0.001, 0.001]
-#
-#
+# gamma = [0.02, 0.02, 0.001, 0.001]
 
 
 mean_tr = []
@@ -35,16 +33,12 @@ std_te = []
 
 
 weight_sharing_recurr = [True] #[False, True, False, True]
-auxiliary_loss = [False]#[False, False, True, True]
+auxiliary_loss = [True]#[False, False, True, True]
 
-# optimal with aux loss
-# reg = [0.003,0.01]
-# lr = [0.01,0.01]
-# gamma = [0.001,0.01]
 
-reg = [0.1]
-lr = [0.001]
-gamma = [0.001]
+reg = [0]
+lr = [0.025]
+gamma = [0.1]
 epochs = 25
 
 AL_weight = 0.1

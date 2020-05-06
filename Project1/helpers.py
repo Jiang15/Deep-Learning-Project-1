@@ -8,28 +8,32 @@ from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader
 import numpy as np
 
-def calc_accuracy(model, data_loader, auxiliary_loss):
+
+def evaluate(model, data_loader, auxiliary_loss, criterion):
     correct = 0
     correct_digit = 0
     total = 0
-
+    loss = 0
     for (image, target, digit_target) in data_loader:
         total += len(target)
         if not auxiliary_loss:
             output = model(image)
+            loss += criterion(output, target)
             _, pred = torch.max(output, 1)
             correct += (pred == target).sum().item()
-            return correct / total
         else:
             digit1, digit2, output = model(image)
+            loss += criterion(output, target)
             _, pred = torch.max(output, 1)
             correct += (pred == target).sum().item()
             _, pred1 = torch.max(digit1, 1)
             correct_digit += (pred1 == digit_target[:, 0]).sum().item()
             _, pred2 = torch.max(digit2, 1)
             correct_digit += (pred2 == digit_target[:, 1]).sum().item()
-
-        return correct / total, correct_digit / 2 / total
+    if not auxiliary_loss:
+        return correct / total, loss
+    else:
+        return correct / total, correct_digit / 2 / total, loss
 
 
 def train(train_data_loader, test_data_loader,
@@ -47,7 +51,9 @@ def train(train_data_loader, test_data_loader,
         Auxialiary loss weight: {AL_weight}
     ''')
 
-    losses = []
+    losses_tr = []
+    losses_te = []
+
     accuracy_train = []
     accuracy_test = []
     accuracy_train_digit = []
@@ -82,21 +88,20 @@ def train(train_data_loader, test_data_loader,
                 pbar.set_postfix(**{"loss (batch)": loss.item()})
                 pbar.update(100)
                 if step % test_every == 0:
-                    losses.append(loss)
-
                     model.eval()
                     with torch.no_grad():
-                        accuracy_train_data = calc_accuracy(model, train_data_loader, auxiliary_loss)
-                        accuracy_test_data = calc_accuracy(model, test_data_loader, auxiliary_loss)
                         if auxiliary_loss:
-                            acc_train, acc_train_digit = accuracy_train_data
-                            acc_test, acc_test_digit = accuracy_test_data
+                            acc_train, acc_train_digit, loss_tr = evaluate(model, train_data_loader, auxiliary_loss, criterion)
+                            acc_test, acc_test_digit, loss_te = evaluate(model, test_data_loader, auxiliary_loss, criterion)
 
                             accuracy_train_digit.append(acc_train_digit)
                             accuracy_test_digit.append(acc_test_digit)
                         else:
-                            acc_train = accuracy_train_data
-                            acc_test = accuracy_test_data
+                            acc_train, loss_tr= evaluate(model, train_data_loader, auxiliary_loss, criterion)
+                            acc_test, loss_te = evaluate(model, test_data_loader, auxiliary_loss, criterion)
+
+                        losses_tr.append(loss_tr)
+                        losses_te.append(loss_te)
 
                         accuracy_train.append(acc_train)
                         accuracy_test.append(acc_test)
@@ -111,16 +116,16 @@ def train(train_data_loader, test_data_loader,
                                             "test accuracy:": accuracy_test[-1]})
 
     if auxiliary_loss:
-        return accuracy_train, accuracy_test, losses, accuracy_train_digit, accuracy_test_digit
+        return accuracy_train, accuracy_test, accuracy_train_digit, accuracy_test_digit, losses_tr, losses_te
     else:
-        return accuracy_train, accuracy_test, losses
+        return accuracy_train, accuracy_test, losses_tr, losses_te
 
 
 def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     if auxiliary_loss:
-        accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info
+        accuracy_train, accuracy_test, acc_train_digit, acc_test_digit, losses_tr, losses_te= train_info
     else:
-        accuracy_train, accuracy_test, losses = train_info
+        accuracy_train, accuracy_test, losses_tr, losses_te = train_info
     fig, ax1 = plt.subplots()
 
     color_tr = 'tab:green'
@@ -135,7 +140,7 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
         ax1.plot(range(len(acc_train_digit)), acc_train_digit, color=color_trd)
         ax1.plot(range(len(acc_test_digit)), acc_test_digit, color=color_ted)
         ax1.set_ylabel("Mean Accuracy Across Trials")
-        ax1.legend(['Train - Green', 'Test-Blue', 'Train_Aux - Orange', 'Test_Aux - Purple'])
+        ax1.legend(['Train - Green', 'Validation - Blue', 'Train_Aux - Orange', 'Validation_Aux - Purple'])
 
     else:
         ax1.set_ylabel("Mean Accuracy Across Trials")
@@ -143,11 +148,15 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     ax1.tick_params(axis='y')
     ax1.set_title("Weight Sharing: "+ str(weight_sharing) + " Auxiliary Loss: "+ str(auxiliary_loss))
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.legend(['Loss'])
-    color_loss = 'tab:red'
-    ax2.set_ylabel("Loss", color=color_loss)  # we already handled the x-label with ax1
-    ax2.plot(range(len(losses)), losses, color=color_loss)
-    ax2.tick_params(axis='y', labelcolor=color_loss)
+    ax2.legend(['Train Loss - Red', 'Validation Loss - Brown'])
+    color_loss_tr = 'tab:red'
+    color_loss_te = 'tab:brown'
+
+    ax2.set_ylabel("Loss", color=color_loss_tr)  # we already handled the x-label with ax1
+    ax2.plot(range(len(losses_tr)), losses_tr, color=color_loss_tr)
+    ax2.plot(range(len(losses_te)), losses_te, color=color_loss_te)
+
+    ax2.tick_params(axis='y', labelcolor=color_loss_tr)
 
     fig.tight_layout()
     plt.grid()
@@ -161,7 +170,9 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
     mean_acc_te = []
     mean_acc_aux_tr = []
     mean_acc_aux_te = []
-    mean_losses = []
+    mean_losses_tr = []
+    mean_losses_te = []
+
     train_info_mean = []
     nb_channels = 2
     nb_class = 2
@@ -179,25 +190,30 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
                            weight_sharing=weight_sharing,
                            auxiliary_loss=auxiliary_loss)
         if auxiliary_loss:
-            accuracy_train, accuracy_test, losses, acc_train_digit, acc_test_digit = train_info
+            accuracy_train, accuracy_test, acc_train_digit, acc_test_digit, losses_tr, losses_te = train_info
             mean_acc_aux_tr.append(acc_train_digit)
             mean_acc_aux_te.append(acc_test_digit)
         else:
-            accuracy_train, accuracy_test, losses = train_info
+            accuracy_train, accuracy_test, losses_tr, losses_te = train_info
         mean_acc_tr.append(accuracy_train)
         mean_acc_te.append(accuracy_test)
-        mean_losses.append(losses)
+        mean_losses_tr.append(losses_tr)
+        mean_losses_te.append(losses_te)
+
         accuracy_trial_tr.append(accuracy_train[-1])
         accuracy_trial_te.append(accuracy_test[-1])
     if auxiliary_loss:
         train_info_mean.append(np.mean(mean_acc_tr,0))
         train_info_mean.append(np.mean(mean_acc_te,0))
-        train_info_mean.append(np.mean(mean_losses,0))
         train_info_mean.append(np.mean(mean_acc_aux_tr,0))
         train_info_mean.append(np.mean(mean_acc_aux_te,0))
+        train_info_mean.append(np.mean(mean_losses_tr,0))
+        train_info_mean.append(np.mean(mean_losses_te,0))
+
+
     else:
         train_info_mean.append(np.mean(mean_acc_tr,0))
         train_info_mean.append(np.mean(mean_acc_te,0))
-        train_info_mean.append(np.mean(mean_losses,0))
-
+        train_info_mean.append(np.mean(mean_losses_tr,0))
+        train_info_mean.append(np.mean(mean_losses_te,0))
     return np.mean(accuracy_trial_tr), np.std(accuracy_trial_tr), np.mean(accuracy_trial_te), np.std(accuracy_trial_te), train_info_mean
