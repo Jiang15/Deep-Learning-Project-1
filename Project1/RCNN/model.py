@@ -30,7 +30,7 @@ class RCL(nn.Module):
 
 
 class CNN(nn.Module):
-    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 32, steps = 2):
+    def __init__(self, channels, num_classes, weight_sharing_recurr, auxiliary_loss, K = 16, steps = 2):
         super(CNN, self).__init__()
         self.weight_sharing_recurr = weight_sharing_recurr
         self.auxiliary_loss = auxiliary_loss
@@ -43,9 +43,11 @@ class CNN(nn.Module):
         self.layer1 = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
         self.layer2 = RCL(weight_sharing_recurr, K, steps=steps)
         self.layer3 = RCL(weight_sharing_recurr, K, steps=steps)
-        self.fc = nn.Linear(K, num_classes, bias = True)
+        self.fc1 = nn.Linear(K * 7 * 7, 40, bias = True)
+        self.fc2 = nn.Linear(40, num_classes, bias = True)
+
         self.dropout = nn.Dropout(p=0.3)
-        self.FC_aux = nn.Linear(self.K * 7 * 7, 10)
+        self.fc_aux = nn.Linear(self.K * 7 * 7, 10)
 
     def forward(self, x):
         x1 = torch.unsqueeze(x[:,0],dim=1)
@@ -62,15 +64,17 @@ class CNN(nn.Module):
         x2 = self.dropout(x2)
         x = x1 + x2
         x = self.layer3(x)
-        x = F.max_pool2d(x, x.shape[-1])
-        x = x.view(-1, self.K)
+        # x = F.max_pool2d(x, x.shape[-1])
+        x = x.view(-1, self.K * 7 * 7)
         x = self.dropout(x)
-        x = self.fc(x)
+        x = self.fc1(x)
+        x = self.fc2(x)
+
         if self.auxiliary_loss:
             y1 = x1.view(-1, self.K * 7 * 7)
             y2 = x2.view(-1, self.K * 7 * 7)
-            y1 = self.FC_aux(y1)
-            y2 = self.FC_aux(y2)
+            y1 = self.fc_aux(y1)
+            y2 = self.fc_aux(y2)
             return y1, y2, x
         else:
             return x

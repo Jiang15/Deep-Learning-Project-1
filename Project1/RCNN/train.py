@@ -32,22 +32,22 @@ std_te = []
 
 
 
-weight_sharing_recurr = [True] #[False, True, False, True]
+weight_sharing_recurr = [False] #[False, True, False, True]
 auxiliary_loss = [True]#[False, False, True, True]
 
 
-reg = [0]
-lr = [0.025]
-gamma = [0.1]
+reg = [0.04]
+lr = [0.01]
+gamma = [0.15]
 epochs = 25
 
-AL_weight = 0.1
+AL_weight = 0.25
 model = CNN
 
 
 
 for i in range(len(auxiliary_loss)):
-    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs, gamma = gamma[i], weight_sharing = weight_sharing_recurr[i], auxiliary_loss = auxiliary_loss[i])
+    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs,test_every=10, gamma = gamma[i], weight_sharing = weight_sharing_recurr[i], auxiliary_loss = auxiliary_loss[i])
     plot_train_info(train_info_mean, weight_sharing_recurr[i], auxiliary_loss[i])
     mean_tr.append(mean_acc_tr)
     mean_te.append(mean_acc_te)
