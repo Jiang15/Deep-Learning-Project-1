@@ -140,15 +140,15 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
         ax1.plot(range(len(acc_train_digit)), acc_train_digit, color=color_trd)
         ax1.plot(range(len(acc_test_digit)), acc_test_digit, color=color_ted)
         ax1.set_ylabel("Mean Accuracy Across Trials")
-        ax1.legend(['Train - Green', 'Validation - Blue', 'Train_Aux - Orange', 'Validation_Aux - Purple'])
+        ax1.legend(['Train - Green', 'Validation - Blue', 'Train_Aux - Orange', 'Validation_Aux - Purple'], loc=1)
 
     else:
         ax1.set_ylabel("Mean Accuracy Across Trials")
-        ax1.legend(['Train - Green', 'Test-Blue'])
+        ax1.legend(['Train - Green', 'Test-Blue'], loc=1)
     ax1.tick_params(axis='y')
     ax1.set_title("Weight Sharing: "+ str(weight_sharing) + " Auxiliary Loss: "+ str(auxiliary_loss))
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.legend(['Train Loss - Red', 'Validation Loss - Brown'])
+    ax2.legend(['Train Loss - Red', 'Validation Loss - Brown'], loc=2)
     color_loss_tr = 'tab:red'
     color_loss_te = 'tab:brown'
 
@@ -161,6 +161,8 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     fig.tight_layout()
     plt.grid()
     # plt.show()
+
+
 
 
 def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, gamma = 0, weight_sharing = False, auxiliary_loss = False):
@@ -176,7 +178,7 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
     train_info_mean = []
     nb_channels = 2
     nb_class = 2
-    for i in range(5): # change to 10+ for report
+    for i in range(3): # change to 10+ for report
         net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
         train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
         # Data loaders
