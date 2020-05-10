@@ -148,13 +148,13 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
     ax1.tick_params(axis='y')
     ax1.set_title("Weight Sharing: "+ str(weight_sharing) + " Auxiliary Loss: "+ str(auxiliary_loss))
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.legend(['Train Loss - Red', 'Validation Loss - Brown'], loc=2)
     color_loss_tr = 'tab:red'
     color_loss_te = 'tab:brown'
 
     ax2.set_ylabel("Loss", color=color_loss_tr)  # we already handled the x-label with ax1
     ax2.plot(range(len(losses_tr)), losses_tr, color=color_loss_tr)
     ax2.plot(range(len(losses_te)), losses_te, color=color_loss_te)
+    ax2.legend(['Train Loss - Red', 'Validation Loss - Brown'], loc=2)
 
     ax2.tick_params(axis='y', labelcolor=color_loss_tr)
 
@@ -165,7 +165,7 @@ def plot_train_info(train_info, weight_sharing, auxiliary_loss):
 
 
 
-def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 100, test_every = 5, gamma = 0, weight_sharing = False, auxiliary_loss = False):
+def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, trial = 10, batch_size = 100, test_every = 5, gamma = 0, weight_sharing = False, auxiliary_loss = False):
     accuracy_trial_tr = []
     accuracy_trial_te = []
     mean_acc_tr = []
@@ -178,7 +178,7 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
     train_info_mean = []
     nb_channels = 2
     nb_class = 2
-    for i in range(3): # change to 10+ for report
+    for i in range(trial):
         net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
         train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
         # Data loaders
@@ -212,10 +212,152 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, batch_size = 1
         train_info_mean.append(np.mean(mean_losses_tr,0))
         train_info_mean.append(np.mean(mean_losses_te,0))
 
-
     else:
         train_info_mean.append(np.mean(mean_acc_tr,0))
         train_info_mean.append(np.mean(mean_acc_te,0))
         train_info_mean.append(np.mean(mean_losses_tr,0))
         train_info_mean.append(np.mean(mean_losses_te,0))
     return np.mean(accuracy_trial_tr), np.std(accuracy_trial_tr), np.mean(accuracy_trial_te), np.std(accuracy_trial_te), train_info_mean
+
+def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_weight, epochs,
+                     batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
+
+    nb_channels = 2
+    nb_class = 2
+
+    train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
+
+    interval = int(train_input.shape[0]/ k_fold)
+    indices = torch.randperm(train_input.shape[0])
+
+    accuracy_tr_set = []
+    accuracy_te_set = []
+    loss_tr_set = []
+    loss_te_set = []
+    train_info_mean_set = []
+
+    max_acc_te = 0
+
+
+    for lr in lr_set:
+        for reg in reg_set:
+            for gamma in gamma_set:
+                accuracy_tr_k = 0
+                accuracy_te_k = 0
+                loss_tr_k = 0
+                loss_te_k = 0
+
+                mean_acc_tr = []
+                mean_acc_te = []
+                mean_acc_aux_tr = []
+                mean_acc_aux_te = []
+                mean_losses_tr = []
+                mean_losses_te = []
+
+                train_info_mean = []
+
+                for k in range(k_fold):
+                    net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
+
+                    train_indices = indices[k*interval:(k+1)*interval]
+                    input_te = train_input[train_indices]
+                    target_te = train_target[train_indices]
+                    digit_target_te = train_class[train_indices]
+                    residual = torch.cat((indices[0:k*interval],indices[(k+1)*interval:]),0)
+                    input_tr = train_input[residual]
+                    target_tr = train_target[residual]
+                    digit_target_tr = train_class[residual]
+
+                    # Data loaders
+                    train_loader = DataLoader(list(zip(input_tr, target_tr, digit_target_tr)), batch_size, shuffle=True)
+                    test_loader = DataLoader(list(zip(input_te, target_te, digit_target_te)), batch_size, shuffle=True)
+                    train_info = train(train_loader, test_loader,
+                                       model=net,
+                                       optimizer=optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
+                                       criterion=criterion, AL_weight=AL_weight,
+                                       epochs=epochs, test_every=test_every, gamma = gamma,
+                                       weight_sharing=weight_sharing,
+                                       auxiliary_loss=auxiliary_loss)
+                    if auxiliary_loss:
+                        accuracy_train, accuracy_test, acc_train_digit, acc_test_digit, losses_tr, losses_te = train_info
+                    else:
+                        accuracy_train, accuracy_test, losses_tr, losses_te = train_info
+
+                    accuracy_tr_k += accuracy_train[-1]
+                    accuracy_te_k += accuracy_test[-1]
+                    loss_tr_k += losses_tr[-1]
+                    loss_te_k += losses_te[-1]
+
+                    mean_acc_tr.append(accuracy_train)
+                    mean_acc_te.append(accuracy_test)
+                    mean_losses_tr.append(losses_tr)
+                    mean_losses_te.append(losses_te)
+
+                accuracy_tr_set.append(accuracy_tr_k/k_fold)
+                accuracy_te_set.append(accuracy_te_k/k_fold)
+                loss_tr_set.append(loss_tr_k/k_fold)
+                loss_te_set.append(loss_te_k/k_fold)
+                if accuracy_te_set[-1] > max_acc_te:
+                    max_acc_te = accuracy_te_set[-1]
+                    best_lr = lr
+                    best_reg = reg
+                    best_gamma = gamma
+
+                if auxiliary_loss:
+                    train_info_mean.append(np.mean(mean_acc_tr,0))
+                    train_info_mean.append(np.mean(mean_acc_te,0))
+                    train_info_mean.append(np.mean(mean_acc_aux_tr,0))
+                    train_info_mean.append(np.mean(mean_acc_aux_te,0))
+                    train_info_mean.append(np.mean(mean_losses_tr,0))
+                    train_info_mean.append(np.mean(mean_losses_te,0))
+
+                else:
+                    train_info_mean.append(np.mean(mean_acc_tr,0))
+                    train_info_mean.append(np.mean(mean_acc_te,0))
+                    train_info_mean.append(np.mean(mean_losses_tr,0))
+                    train_info_mean.append(np.mean(mean_losses_te,0))
+                train_info_mean_set.append(train_info_mean)
+    return best_lr, best_reg, best_gamma, loss_tr_set, loss_te_set, accuracy_tr_set, accuracy_te_set, train_info_mean_set
+
+# plot loss and accuracy on same plot
+def plotLossAcc(loss_tr_plot, loss_te_plot, acc_tr_plot, acc_te_plot, var_plot, var_plot_label, title):
+    fig, ax1 = plt.subplots()
+    color_tr = 'tab:green'
+    color_te = 'tab:blue'
+    color_tra = 'tab:orange'
+    color_tea = 'tab:purple'
+    ax1.set_xlabel(var_plot_label)
+    ax1.set_ylabel('Loss')
+
+    ax1.set_title(title)
+
+    ax1.plot(var_plot,loss_tr_plot,color=color_tr)
+    ax1.plot(var_plot,loss_te_plot, color=color_te)
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    ax2.plot(var_plot, acc_tr_plot, color=color_tra)
+    ax2.plot(var_plot, acc_te_plot, color=color_tea)
+    ax2.set_ylabel('Accuracy')
+
+    ax1.legend(['train_loss','test_loss'])
+    ax2.legend(['train_acc', 'test_acc'],loc='lower right')
+
+
+def plotCV(loss_tr_set, loss_te_set, accuracy_tr_set, accuracy_te_set, var_fixed, var_plot, fixed_id, var_plot_label, var_fixed_label):
+    Nf = len(var_fixed)
+    Np = len(var_plot)
+
+
+
+    loss_tr_plot = []
+    loss_te_plot = []
+    acc_tr_plot = []
+    acc_te_plot = []
+    for i in range(Np):
+        title = var_fixed_label + str(var_fixed[fixed_id])
+        loss_tr_plot.append(loss_tr_set[i*Nf + fixed_id].item())
+        loss_te_plot.append(loss_te_set[i*Nf + fixed_id].item())
+        acc_tr_plot.append(accuracy_tr_set[i*Nf + fixed_id])
+        acc_te_plot.append(accuracy_te_set[i*Nf + fixed_id])
+
+
+    plotLossAcc(loss_tr_plot, loss_te_plot, acc_tr_plot, acc_te_plot, var_plot, var_plot_label, title)

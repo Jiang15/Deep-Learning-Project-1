@@ -73,15 +73,15 @@ def cross_validation(k_fold, lr_set, input, target):
     acc_te_set = []
 #     min_loss_te = float('inf')
     max_acc_te = 0.
-    model = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
     best_lr = 0
     for lr in lr_set:
-        optimizer = SGD(parameters = model.param(), lr = lr.item())
         loss_tr = 0
         loss_te = 0
         acc_tr = 0
         acc_te = 0
         for k in range(k_fold):
+            model = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
+            optimizer = SGD(parameters = model.param(), lr = lr.item())
             train_indices = indices[k*interval:(k+1)*interval]
             input_te = input[train_indices]
             target_te = target[train_indices]

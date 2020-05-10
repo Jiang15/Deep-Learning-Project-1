@@ -14,11 +14,11 @@ class RCL(nn.Module):
 
     def forward(self, x):
         rx = x
-        for i in range(self.steps):
+        for i in range(self.steps): # steps <= 3
             if i == 0:
                 x = self.conv(x)
             else:
-                rx = self.recurr(rx)
+                rx = self.recurr(rx) # use recurr input from previous layer to update
                 x = self.conv(x) + rx
             x = self.relu(x)
             x = self.bn[i](x)
@@ -70,9 +70,9 @@ class CNN(nn.Module):
 
         self.layer1 = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
         self.layer2 = nn.Conv2d(1, K, kernel_size = 3, padding = 1)
-        self.rcl1 = RCL(self.K, steps=self.steps)
-        self.rcl2 = RCL(self.K, steps=self.steps)
-        self.rcl3 = RCL(self.K, steps=self.steps)
+        self.rcl1 = RCL(K, steps=steps)
+        self.rcl2 = RCL(K, steps=steps)
+        self.rcl3 = RCL(K, steps=steps)
 
         self.fc1 = nn.Linear(K * 7 * 7, 40, bias = True)
         self.fc2 = nn.Linear(40, num_classes, bias = True)
