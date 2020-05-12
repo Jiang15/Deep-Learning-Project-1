@@ -46,7 +46,7 @@ def train(model, Loss, optimizer, input_tr, target_tr, input_te, target_te, nb_e
             model.zero_grad()
             tmp = Loss.backward(output, target_tr.narrow(0, b, batch_size))
             model.backward(tmp)
-            optimizer.step()
+            optimizer.update()
 
         output_tr = model.forward(input_tr)
         loss_e_tr = Loss.forward(output_tr, target_tr).item()
