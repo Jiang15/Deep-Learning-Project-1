@@ -1,9 +1,8 @@
 from torch import nn
-from Project1.RCNN.model import CNN, CNN_recurr
+from Project1.RCNN.model import CNN
 from Project1.helpers import plot_train_info, get_train_stats
 from torchsummary import summary
 import matplotlib.pyplot as plt
-
 
 
 # Data loaders
@@ -14,9 +13,9 @@ nb_class = 2 # number of output classes
 
 cross_entropy = nn.CrossEntropyLoss()
 
-RNN_model = CNN_recurr(nb_channels, nb_class,False, False, K = 32)
+RNN_model = CNN(nb_channels, nb_class,False, False, K = 32)
 summary(RNN_model, input_size=(2, 14, 14))
-RNN_model = CNN_recurr(nb_channels, nb_class,True, False, K = 32)
+RNN_model = CNN(nb_channels, nb_class,True, False, K = 32)
 summary(RNN_model, input_size=(2, 14, 14))
 
 
@@ -31,18 +30,18 @@ weight_sharing = [False] #[False, True, False, True]
 auxiliary_loss = [False]#[False, False, True, True]
 
 
-reg = [0.06] # CNN: 0.0.863 TF: 0.02 0.0018 0.7 (0.854) # 0.839 FF: 0.03 0.0022 0.2 (0.836) # FT: 0.868 0.06 0.0015 0.3 al 0.3 (0.8605)  TT: 0.893 0.085 0.0015 0.3 al 0.4 (0.8924)
-lr = [0.004]# CNN_recurr: 0.862 FF: 0.06 0.0017 0.5 (0.) # 0.849 TF: 0.04 0.002 0.6 # FT: 0.8793 0.075 0.0015 0.3 al 0.3 (0.)
-gamma = [0.25]
+reg = [0.15] # TT: 0.3 0.002 0.1 al 0.6 (0.9289, std 0.0120) FT 0.3 0.002 0.1 1(0.9445, std 0.0098) # TF 0.15 0.0025 0.1 (0.8703, std 0.0152)
+lr = [0.002] # FF 0.2 0.002 0.1 (0.8645, std 0.0124)
+gamma = [0.1]
 epochs = 25
-
-AL_weight = 0.4
+trial =  11
+AL_weight = 1
 model = CNN
 
 
 
 for i in range(len(auxiliary_loss)):
-    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs, trial = 10, test_every=10, gamma = gamma[i], weight_sharing = weight_sharing[i], auxiliary_loss = auxiliary_loss[i])
+    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs, trial = trial, test_every=10, gamma = gamma[i], weight_sharing = weight_sharing[i], auxiliary_loss = auxiliary_loss[i])
     plot_train_info(train_info_mean, weight_sharing[i], auxiliary_loss[i])
     mean_tr.append(mean_acc_tr)
     mean_te.append(mean_acc_te)
