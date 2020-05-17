@@ -7,12 +7,14 @@ import numpy as np
 class Linear(Module):
     def __init__(self, in_nodes, out_nodes):
         super(Linear, self).__init__()
-        type = torch.float32
-        std = np.sqrt(2. / (in_nodes + out_nodes))
-        self.weights = Parameters(torch.zeros(out_nodes, in_nodes, dtype=torch.float32).normal_(0, std))
-        self.bias = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
-        self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
-        self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
+        self.in_nodes = in_nodes
+        self.out_nodes = out_nodes
+        self.reset()
+        # std = np.sqrt(2. / (in_nodes + out_nodes))
+        # self.weights = Parameters(torch.zeros(out_nodes, in_nodes, dtype=torch.float32).normal_(0, std))
+        # self.bias = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
+        # self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
+        # self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
 
     def zero_grad(self):
         self.weights.grad.zero_()
@@ -33,15 +35,23 @@ class Linear(Module):
     def param(self):
         return self.weights, self.bias
 
+    def reset(self):
+        in_nodes = self.in_nodes
+        out_nodes = self.out_nodes
+        std = np.sqrt(2. / (in_nodes + out_nodes))
+        self.weights = Parameters(torch.zeros(out_nodes, in_nodes, dtype=torch.float32).normal_(0, std))
+        self.bias = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
+        self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
+        self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
 
 class Relu(Module):
     def __init__(self):
         super(Relu, self).__init__()
         self.input = torch.empty(1)
 
-    def forward(self, x):
-        self.input = x
-        return x.clamp(min=0)
+    def forward(self, input):
+        self.input = input
+        return input.clamp(min=0)
 
     # def backward(self,x):
     # out=self.input
@@ -59,11 +69,11 @@ class Relu(Module):
         grad[self.input <= 0] = 0
         return grad * gradwrtoutput
 
-
 class Leaky_Relu(Module):
     def __init__(self):
         super(Leaky_Relu, self).__init__()
         self.input = torch.empty(1)
+
     def forward(self, input):
         self.input = input
         return input * (input>0).float().add(0.01 * input * (input<0).float())
@@ -93,7 +103,6 @@ class Sigmoid(Module):
 
     def forward(self, input):
         self.input = input
-
         return input.sigmoid()
     # Backward pass
     def backward(self, gradwrtoutput):
@@ -102,9 +111,10 @@ class Sigmoid(Module):
 
 
 class Tanh(Module):
-
     def __init__(self):
-        self.input = None
+        # self.input = None
+        super(Tanh, self).__init__()
+        self.input = torch.empty(1)
 
     def forward(self, input):
         self.input = input

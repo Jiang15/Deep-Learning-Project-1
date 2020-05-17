@@ -25,5 +25,4 @@ plt.legend()
 plt.xlabel('x position of data points')
 plt.ylabel('y position of data points')
 plt.title('Datapoints')
-plt.show()
 

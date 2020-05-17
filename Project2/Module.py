@@ -36,6 +36,10 @@ class Module(object):
         #     if p.grad is not None:
         #         p.grad.detach_()
         #         p.grad.zero_()
+
+    def reset(self):
+        pass
+
 class Parameters(Module):
     def __init__(self,value):
         super(Parameters,self).__init__()

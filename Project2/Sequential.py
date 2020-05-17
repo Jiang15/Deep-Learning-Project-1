@@ -24,3 +24,7 @@ class Sequential(Module):
             for p in param:
                 parameter.append(p)
         return parameter
+
+    def reset(self):
+        for layer in self.layers:
+            layer.reset()
