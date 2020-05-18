@@ -2,12 +2,13 @@ import math
 import torch
 
 # from Project2.dataset import generate_disc_set
-from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu
-from Project2.loss_func import MSELoss
-from Project2.optimizers import  SGD
+from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu, Sigmoid
+from Project2.loss_func import MSELoss, BCELoss
+from Project2.optimizers2 import  SGD, Adam, MomentumSGD, AdaGrad
 from Project2.Sequential import Sequential
 from matplotlib import pyplot as plt
 from Project2.helpers import normalize, plotLossAcc, generate_disc_set, train, cross_validation
+
 
 ########################################################################################################################
 # initial setups
@@ -23,15 +24,16 @@ train_input = normalize(train_input)
 test_input = normalize(test_input)
 
 # K-fold cross validation to optimize learning rate over range lr_set
-lr_set = torch.logspace(-2, -0.1, 20)
+lr_set = torch.logspace(-3, -0.1, 10)
 k_fold = 10
 
 # create models
 model_LReLu = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
-model_Tanh = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), Tanh(),Linear(25,2))
+model_Tanh = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), Tanh(),Linear(25,2), Sigmoid())
+# model_Tanh = Sequential(Linear(2,25), Tanh(),Linear(25,2))
 
 # set optimizer and loss
-optimizer_name = SGD
+optimizer_name = MomentumSGD
 loss = MSELoss()
 
 ########################################################################################################################
@@ -43,8 +45,6 @@ loss = MSELoss()
 best_lr_Tanh, loss_tr_set_Tanh, loss_te_set_Tanh, acc_tr_set_Tanh, acc_te_set_Tanh = cross_validation(model_Tanh, optimizer_name, nb_epochs, batch_size, loss, k_fold,lr_set, train_input,train_target)
 print(best_lr_Tanh)
 plotLossAcc(loss_tr_set_Tanh, loss_te_set_Tanh, acc_tr_set_Tanh, acc_te_set_Tanh, lr_set, "Learning Rate")
-
-print(loss_te_set_Tanh)
 ########################################################################################################################
 # train models with best learning rates found
 

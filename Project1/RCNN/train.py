@@ -26,11 +26,11 @@ std_te = []
 
 
 
-weight_sharing = [True] #[False, True, False, True]
-auxiliary_loss = [True]#[False, False, True, True]
+weight_sharing = [False] #[False, True, False, True]
+auxiliary_loss = [False]#[False, False, True, True]
 
 
-reg = [0.25] # TT: 0.3 0.002 0.1 al 0.6 (0.9272, std 0.0102) FT 0.3 0.002 0.1 1(0.9445, std 0.0098) # TF 0.1 0.0015 0.1 (0.8715, std 0.0134)
+reg = [0.2] # TT: 0.3 0.002 0.1 al 0.6 (0.9272, std 0.0102) FT 0.3 0.002 0.1 1(0.9445, std 0.0098) # TF 0.1 0.0015 0.1 (0.8715, std 0.0134)
 lr = [0.002] # FF 0.2 0.002 0.1 (0.8645, std 0.0124)
 gamma = [0.1]
 epochs = 25

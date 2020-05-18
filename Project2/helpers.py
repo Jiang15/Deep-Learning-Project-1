@@ -41,10 +41,10 @@ def plotLossAcc(loss_tr, loss_te, acc_tr, acc_te, x, xlabel):
     ax2.plot(x, acc_tr, color=color_tra)
     ax2.plot(x, acc_te, color=color_tea)
 
-    ax1.legend(['train_loss','test_loss'])
-    ax2.legend(['train_acc', 'test_acc'],loc='lower right')
+    ax1.legend(['train_loss','validation_loss'])
+    ax2.legend(['train_accuracy', 'validation_accuracy'],loc='lower right')
 
-    ax1.set_title("Test Accuracy = "+str(acc_te[-1]))
+    ax1.set_title("Validation Accuracy = "+str(acc_te[-1]))
     # plt.show()
 
 

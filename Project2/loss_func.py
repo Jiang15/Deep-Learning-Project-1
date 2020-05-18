@@ -1,5 +1,6 @@
 import _ini_
 import torch
+import math
 
 from Project2.Module import Module
 
@@ -22,34 +23,11 @@ class BCELoss(object):
     def __init__(self):
         super(BCELoss, self).__init__()
 
-    def loss(self, y, y_pred):
+    def forward(self, y, y_pred):
         y = y.view(y_pred.size())
         loss = -y_pred * torch.log(y) - (1 - y_pred) * torch.log(1 - torch.sigmoid(y))
         return loss
 
-    def grad(self, y, y_pred):
+    def backward(self, y, y_pred):
         grad = -y_pred / y - (1 - y_pred) * (-1 / (1 - torch.sigmoid(y))) * (torch.exp(-y) / (1 + torch.exp(-y)) ** 2)
         return grad
-
-class SGD():
-    '''
-    stochastic gradient descent optimizer
-    '''
-    def __init__(self, lr, model):
-        '''
-        initialize the optimizer
-        :param lr: learning rate
-        :param model: the model to be optimized
-        '''
-        self.lr = lr
-        self.model = model
-
-    def step(self):
-        '''
-        update parameters with corresponding gradients
-        '''
-        for m in self.model.modules:
-            if m.param()!=[]:
-                m.weight -= self.lr * m.weight_grad
-                if m.ifbias:
-                    m.bias -= self.lr * m.bias_grad

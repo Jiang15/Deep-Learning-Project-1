@@ -10,9 +10,9 @@ weight_sharing = True #[False, True, False, True]
 auxiliary_loss = True#[False, False, True, True]
 criterion = nn.CrossEntropyLoss()
 
-reg_set = [0.25, 0.3, 0.35]
-lr_set = [ 0.0015, 0.002, 0.0025]
-gamma_set = [0.1]
+reg_set = [0, 0.01, 0.1]
+lr_set = [ 0.0001, 0.001, 0.01]
+gamma_set = [0.1,0.2]
 epochs = 25
 k_fold = 10
 

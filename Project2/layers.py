@@ -2,7 +2,7 @@
 import torch
 from Project2.Module import Module, Parameters
 import numpy as np
-
+import math
 
 class Linear(Module):
     def __init__(self, in_nodes, out_nodes):
@@ -10,11 +10,6 @@ class Linear(Module):
         self.in_nodes = in_nodes
         self.out_nodes = out_nodes
         self.reset()
-        # std = np.sqrt(2. / (in_nodes + out_nodes))
-        # self.weights = Parameters(torch.zeros(out_nodes, in_nodes, dtype=torch.float32).normal_(0, std))
-        # self.bias = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
-        # self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
-        # self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
 
     def zero_grad(self):
         self.weights.grad.zero_()

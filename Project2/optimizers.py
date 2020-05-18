@@ -9,6 +9,8 @@ class SGD(object):
 
     def update(self):
         for param in self.parameters:
+            # print('v ', param.value)
+            # print('g', param.grad)
             param.value = param.value - self.lr * param.grad
 
 
