@@ -1,4 +1,3 @@
-import math
 import torch
 
 # from Project2.dataset import generate_disc_set
@@ -24,8 +23,8 @@ train_input = normalize(train_input)
 test_input = normalize(test_input)
 
 # K-fold cross validation to optimize learning rate over range lr_set
-lr_set = torch.logspace(-3, -0.1, 10)
-k_fold = 10
+lr_set = torch.logspace(-3, -0.1, 5)
+k_fold = 5
 
 # create models
 model_LReLu = Sequential(Linear(2,25),Elu(),Linear(25,50),Leaky_Relu(),Linear(50,25), Elu(),Linear(25,2))
@@ -33,7 +32,7 @@ model_Tanh = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), 
 # model_Tanh = Sequential(Linear(2,25), Tanh(),Linear(25,2))
 
 # set optimizer and loss
-optimizer_name = MomentumSGD
+optimizer_name = AdaGrad
 loss = MSELoss()
 
 ########################################################################################################################

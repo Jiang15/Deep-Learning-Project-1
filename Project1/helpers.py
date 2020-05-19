@@ -7,7 +7,7 @@ from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader
 import numpy as np
 
-
+# set seed
 torch.manual_seed(0)
 np.random.seed(0)
 

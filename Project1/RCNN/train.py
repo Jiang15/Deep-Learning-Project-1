@@ -7,17 +7,10 @@ import matplotlib.pyplot as plt
 
 # Data loaders
 batch_size = 100
-nb_channels = 2 # input channel
 nb_digits = 10 # number of digit classes
 nb_class = 2 # number of output classes
 
 cross_entropy = nn.CrossEntropyLoss()
-
-RNN_model = CNN(nb_channels, nb_class,False, False, K = 32)
-summary(RNN_model, input_size=(2, 14, 14))
-RNN_model = CNN(nb_channels, nb_class,True, False, K = 32)
-summary(RNN_model, input_size=(2, 14, 14))
-
 
 mean_tr = []
 mean_te = []
@@ -30,8 +23,8 @@ weight_sharing = [False] #[False, True, False, True]
 auxiliary_loss = [False]#[False, False, True, True]
 
 
-reg = [0.2] # TT: 0.3 0.002 0.1 al 0.6 (0.9272, std 0.0102) FT 0.3 0.002 0.1 1(0.9445, std 0.0098) # TF 0.1 0.0015 0.1 (0.8715, std 0.0134)
-lr = [0.002] # FF 0.2 0.002 0.1 (0.8645, std 0.0124)
+reg = [0.15] # TT: 0.3 0.002 0.1 al 0.6 (0.9272, std 0.0102) FT 0.3 0.002 0.1 1(0.9445, std 0.0098) # TF 0.1 0.0015 0.1 (0.8766, std 0.0127)
+lr = [0.001] # FF 0.15 0.0015 0.1 (0.8618, std 0.0129)
 gamma = [0.1]
 epochs = 25
 trial =  11

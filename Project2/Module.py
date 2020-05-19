@@ -2,46 +2,60 @@ import torch
 
 
 class Module(object):
+    """
+    Abstract class to implement module as the building block of the model
+    """
     def _init_(self):
+        """
+        Initialize module
+        """
         self.module = 0
 
     def forward(self, *input):
+        """
+        Defines and applies a formula for the forward pass.
+        This function is to be overridden by all subclasses that inherit module.
+        """
         raise NotImplementedError
 
     def backward(self, *output):
-        """Copied from autograd: https://github.com/pytorch/pytorch/blob/master/torch/autograd/function.py"""
-        r"""Defines a formula for differentiating the operation.
-        This function is to be overridden by all subclasses.
-        It must accept a context :attr:`ctx` as the first argument, followed by
-        as many outputs did :func:`forward` return, and it should return as many
-        tensors, as there were inputs to :func:`forward`. Each argument is the
-        gradient w.r.t the given output, and each returned value should be the
-        gradient w.r.t. the corresponding input.
-        The context can be used to retrieve tensors saved during the forward
-        pass. It also has an attribute :attr:`ctx.needs_input_grad` as a tuple
-        of booleans representing whether each input needs gradient. E.g.,
-        :func:`backward` will have ``ctx.needs_input_grad[0] = True`` if the
-        first input to :func:`forward` needs gradient computated w.r.t. the
-        output.
+        """
+        Defines and applies a formula for differentiating the forward operation in the backward pass.
+        This function is to be overridden by all subclasses that inherit module.
         """
         raise NotImplementedError
 
     def param(self):
-        return []
+        """
+        Returns a list of pairs consisted of parameters in class and their corresponding gradients.
+        """
+        return [[],[]]
+
 
     def zero_grad(self):
+        """
+        Sets gradients of parameters to zero
+        """
         pass
-        # from autograd
-        # for p in self.param():
-        #     if p.grad is not None:
-        #         p.grad.detach_()
-        #         p.grad.zero_()
 
     def reset(self):
+        """
+        Reset class to its initial state
+        """
+        pass
+
+    def update(self, param):
         pass
 
 class Parameters(Module):
+    """
+    Parameter class to store parameter value and gradient
+    """
     def __init__(self,value):
+        """
+        Initialize parameter with given value and 0 gradient
+        :param value:
+        """
         super(Parameters,self).__init__()
         self.value = value
         self.grad = torch.zeros_like(self.value)

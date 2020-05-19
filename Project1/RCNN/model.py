@@ -1,10 +1,17 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 
 
 class RCL(nn.Module):
+    """
+    Defines recurrent convolutional layer (RCL)
+    """
     def __init__(self, K, steps):
+        """
+        Initializes RCL
+        :param K: number of feature maps in convolution
+        :param steps: number of time steps
+        """
         super(RCL, self).__init__()
         self.steps = steps
         self.conv = nn.Conv2d(K, K, kernel_size=3, stride=1, padding=1, bias=False)
@@ -13,20 +20,33 @@ class RCL(nn.Module):
         self.recurr = nn.Conv2d(K, K, kernel_size=3, stride=1, padding=1, bias=False)
 
     def forward(self, x):
-        rx = x
+        rx = x # initialize recurrent state
         for i in range(self.steps): # steps <= 3
             if i == 0:
-                x = self.conv(x)
+                x = self.conv(x) # only feed-forward connection at first time step
             else:
                 rx = self.recurr(rx) # recurrent state update
-                x = self.conv(x) + rx
+                x = self.conv(x) + rx # output in time update
             x = self.relu(x)
             x = self.bnList[i](x)
         return x
 
 class CNN(nn.Module):
+    """
+    (Recurrent) convolutional neural network
+    """
     def __init__(self, channels, num_classes, weight_sharing, auxiliary_loss, K = 32, steps = 3):
+        """
+        initialize the model
+        :param channels: input channel number
+        :param num_classes: output channel number
+        :param weight_sharing: boolean flag for weight sharing application
+        :param auxiliary_loss: boolean flag for auxiliary loss application
+        :param K: number of feature maps in convolution
+        :param steps: time step for recurrent convolutional layer, also if no weight sharing, number of replacement convolutional layers
+        """
         super(CNN, self).__init__()
+        assert channels == 2 # check input channel is 2
         self.weight_sharing = weight_sharing
         self.auxiliary_loss = auxiliary_loss
         self.K = K
@@ -50,12 +70,12 @@ class CNN(nn.Module):
         self.rcl2 = RCL(K, steps=steps)
         self.rcl3 = RCL(K * 2, steps=steps)
 
-        self.fc1 = nn.Linear(K * 2 * 7 * 7, 128, bias = True)
-        self.fc2 = nn.Linear(128, num_classes, bias = True)
+        self.fc = nn.Sequential(nn.Linear(K * 2 * 7 * 7, 128, bias = True), nn.ReLU(), nn.Linear(128, num_classes, bias = True))
         self.dropout = nn.Dropout(p=0.3)
         self.fc_aux = nn.Linear(K * 7 * 7, 10)
 
     def forward(self, x):
+        # split 2 channel input into two images
         x1 = torch.unsqueeze(x[:,0],dim=1)
         x2 = torch.unsqueeze(x[:,1],dim=1)
         x1 = self.bn1(self.relu(self.layer1(x1)))
@@ -64,10 +84,10 @@ class CNN(nn.Module):
         x2 = self.pooling(x2)
         x1 = self.dropout(x1)
         x2 = self.dropout(x2)
-        if self.weight_sharing:
+        if self.weight_sharing: # weight sharing case: RCNN
             x1 = self.rcl1(x1)
             x2 = self.rcl2(x2)
-        else:
+        else: # no weight sharing case: CNN
             for i in range(self.steps):
                 x1 = self.convList1[i](x1)
                 x2 = self.convList1[i](x2)
@@ -77,26 +97,25 @@ class CNN(nn.Module):
                 x2 = self.bnList1[i](x2)
         x1 = self.dropout(x1)
         x2 = self.dropout(x2)
-#         x = x1 + x2
+        # concatenate
         x = torch.cat((x1, x2), dim = 1)
-        if self.weight_sharing:
+        if self.weight_sharing: # weight sharing case: RCNN
             x = self.rcl3(x)
-        else:
+        else: # no weight sharing case: CNN
             for i in range(self.steps):
                 x = self.convList2[i](x)
                 x = self.relu(x)
                 x = self.bnList2[i](x)
-        # x = F.max_pool2d(x, x.shape[-1])
         x = x.view(-1, self.K * 2 * 7 * 7)
         x = self.dropout(x)
-        x = self.fc1(x)
-        x = self.fc2(x)
-        if self.auxiliary_loss:
+        # fully connected layers
+        x = self.fc(x)
+        if self.auxiliary_loss: # with auxiliary loss
             y1 = x1.view(-1, self.K * 7 * 7)
             y2 = x2.view(-1, self.K * 7 * 7)
             y1 = self.fc_aux(y1)
             y2 = self.fc_aux(y2)
             return y1, y2, x
-        else:
+        else: # no auxiliary loss
             return x
 

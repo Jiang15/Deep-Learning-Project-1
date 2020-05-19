@@ -7,12 +7,12 @@ from matplotlib import pyplot as plt
 
 
 weight_sharing = True #[False, True, False, True]
-auxiliary_loss = True#[False, False, True, True]
+auxiliary_loss = False #[False, False, True, True]
 criterion = nn.CrossEntropyLoss()
 
-reg_set = [0, 0.01, 0.1]
-lr_set = [ 0.0001, 0.001, 0.01]
-gamma_set = [0.1,0.2]
+reg_set = [0.05, 0.1, 0.15]
+lr_set = [ 0.001, 0.0015, 0.002]
+gamma_set = [0.1]
 epochs = 25
 k_fold = 10
 

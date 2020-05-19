@@ -1,4 +1,3 @@
-import _ini_
 import torch
 
 class SGD(object):
@@ -12,7 +11,7 @@ class SGD(object):
 
 
 class MomentumSGD(object):
-    def __init__(self, parameters ,lr, rho = 0.9):
+    def __init__(self, parameters, lr, rho = 0.85):
         self.lr= lr
         self.rho = rho
         self.parameters = parameters
@@ -49,15 +48,26 @@ class Adam(object):
 
 
 class AdaGrad(object):
-    def __init__(self, parameters ,lr,delta = 0.1):
+    def __init__(self, parameters, lr,delta = 0.1):
         self.lr = lr
         self.delta=delta
         self.parameters = parameters
         self.r=[]
         for param in parameters:
-            self.r.append(torch.zeros_like(param.value))
-    def update(self):
-        for i, p in zip(range(len(self.r)),self.parameters):
-            self.r[i] = self.r[i]+ torch.mul(p.grad, p.grad)
-            p.value =p.value-self.lr * p.grad /(self.delta + torch.sqrt(self.r[i]))
+            if param != []:
+                self.r.append(torch.zeros_like(param[0]))
+            else:
+                self.r.append([])
 
+    def update(self, parameters):
+        temp = []
+        for n in range(len(self.r)//2):
+            param = parameters[n*2:2*n+2]
+            new_p = []
+            for i, p in enumerate(param):
+                if p != []:
+                    self.r[n*2+i] = self.r[n*2+i]+ torch.mul(p[1], p[1])
+                    p[0] =p[0]-self.lr * p[1] /(self.delta + torch.sqrt(self.r[n*2+i]))
+                new_p.append(p)
+            temp.append(new_p)
+        return temp
