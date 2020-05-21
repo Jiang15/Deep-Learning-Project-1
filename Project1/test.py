@@ -3,7 +3,6 @@ from Project1.models.Siamese import Siamese
 from Project1.models.RCNN import CNN
 from Project1.models.FNN import FNN
 from Project1.models.Resnet import ResNet
-
 from Project1.helpers import get_train_stats, cross_validation
 from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader

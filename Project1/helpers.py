@@ -18,7 +18,9 @@ def evaluate(model, data_loader, auxiliary_loss, criterion):
     :param data_loader: data loader that contains image, target, and digit_target
     :param auxiliary_loss: boolean flag for applying auxiliary loss
     :param criterion: loss function
-    :return: primary task accuracy, average digit recognition accuracy, loss
+    :return correct/total: primary task accuracy
+    :return correct_digit/2/total: average digit recognition accuracy
+    :return loss: testing loss
     """
     correct = 0
     correct_digit = 0
@@ -62,8 +64,12 @@ def train(train_data_loader, test_data_loader,
     :param gamma: learning rate scheduler's multiplicative factor
     :param weight_sharing:  boolean flag for applying weight sharing
     :param auxiliary_loss:  boolean flag for applying auxiliary loss
-    :return: if aux loss is applied, return primary task accuracies of training and test sets, digit recognition accuracies of traing and test sets, training loss and test(validation) loss
-            if aux loss is not applied, return primary task accuracies of training and test sets, training loss and test(validation) loss
+    :return acc_train: primary task accuracies of training set
+    :return acc_test: primary task accuracies of testing set
+    :return acc_train_digit: digit recognition accuracies of traing set
+    :return acc_test_digit: digit recognition accuracies of test set
+    :return loss_tr: training loss
+    :return loss_te: test(validation) loss
     """
     if gamma != 0: # if gamma is not 0, set up learning rate scheduler
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=gamma)
@@ -115,8 +121,10 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, trial, batch_s
     :param gamma: learning rate shceduler's multiplicative factor
     :param weight_sharing: boolean flag for applying weight sharing
     :param auxiliary_loss: boolean flag for applying auxiliary loss
-    :return: mean primary task training accuracy across trials, standard deviation of primary task training accuracy across trials,
-    mean primary task test accuracy across trials, standard deviation of primary task test accuracy across trials
+    :return np.mean(accuracy_trial_tr): mean primary task training accuracy across trials
+    :return np.std(accuracy_trial_tr): standard deviation of primary task training accuracy across trials
+    :return np.mean(accuracy_trial_te): mean primary task test accuracy across trials
+    :return np.std(accuracy_trial_te): standard deviation of primary task test accuracy across trials
     """
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.info(f'''Starting training:
@@ -196,8 +204,9 @@ def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_we
     :param batch_size: data batch size
     :param weight_sharing: boolean flag for applying weight sharing
     :param auxiliary_loss: boolean flag for applying auxiliary loss
-    :return: best lr, best reg, best gamma (all based on maximum validation accuracy),
-    set of training loss, set of test loss, set of primary task training accuracy, set of primary task test accuracy (all across hyperparameters tested)
+    :print best lr, best reg, best gamma (all based on maximum validation accuracy),
+    set of training loss, set of test loss, set of primary task training accuracy, set of primary task test accuracy
+    (all across hyperparameters tested)
     """
     nb_channels = 2
     nb_class = 2
