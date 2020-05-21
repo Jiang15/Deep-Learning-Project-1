@@ -3,9 +3,9 @@ from torch import optim
 from torch.utils.data import DataLoader
 from Project1.SiameseNet.model import Siamese
 from Project1.helpers import train, plot_train_info
+from Project1.test import get_train_stats
 from dlc_practical_prologue import generate_pair_sets
-
-
+import matplotlib.pyplot as plt
 
 N = 1000
 train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(N)
@@ -18,46 +18,34 @@ nb_digits = 10 # number of digit classes
 nb_class = 2 # number of output classes
 
 cross_entropy = nn.CrossEntropyLoss()
-
-
 # reg = 0.001
 # lr = 0.0004# Add learning rate
 # AL_weight = 1
-reg = 0.001
-lr = 0.01# Add learning rate
+reg = [0.001]
+lr = [0.01]# Add learning rate
 AL_weight = 1
+weight_sharing = [False] #[False, True, False, True]
+auxiliary_loss = [True]
+gamma = [0]
+model = Siamese
 epochs = 25
-weight_sharing_CNN = True
-weight_sharing_FC = True
-auxiliary_loss = False
-net = Siamese(weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
-train_info_WS = train(train_loader, test_loader,
-                     model = net,
-                     optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay = reg),
-                     criterion = cross_entropy, AL_weight = AL_weight,
-                     epochs = epochs, test_every = 10, weight_sharing= weight_sharing_CNN, auxiliary_loss = auxiliary_loss)
-weight_sharing_CNN = False
-weight_sharing_FC = False
-auxiliary_loss = True
-net = Siamese(weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
-train_info_AL = train(train_loader, test_loader,
-                 model = net,
-                 optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
-                 criterion = cross_entropy, AL_weight = AL_weight,
-                 epochs = epochs, test_every=10, weight_sharing= weight_sharing_CNN,  auxiliary_loss = auxiliary_loss)
+trial =  11
+mean_tr = []
+mean_te = []
+std_tr = []
+std_te = []
 
+for i in range(len(auxiliary_loss)):
+    mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te, train_info_mean = get_train_stats(model, lr[i], reg[i], cross_entropy, AL_weight = AL_weight, epochs = epochs,  gamma = gamma[i], weight_sharing = False, auxiliary_loss = auxiliary_loss[i])
+    plot_train_info(train_info_mean, weight_sharing = False, auxiliary_loss = auxiliary_loss[i])
+    mean_tr.append(mean_acc_tr)
+    mean_te.append(mean_acc_te)
+    std_tr.append(std_acc_tr)
+    std_te.append(std_acc_te)
 
+for j in range(len(auxiliary_loss)):
+    print("AL: ", auxiliary_loss[j],\
+          "Train Accuracy: Mean = ", mean_tr[j], "STD =", std_tr[j], "Test Accuracy: Mean = ", mean_te[j], "STD =", std_te[j])
 
-weight_sharing_CNN = False
-weight_sharing_FC = False
-auxiliary_loss = False
-net = Siamese(weight_sharing_CNN, weight_sharing_FC, auxiliary_loss)
-train_info = train(train_loader, test_loader,
-                         model = net,
-                         optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
-                         criterion = cross_entropy, AL_weight = AL_weight,
-                         epochs = epochs, test_every=10,gamma = 1, weight_sharing=False, auxiliary_loss = auxiliary_loss)
+plt.show()
 
-plot_train_info(train_info, False, False)
-plot_train_info(train_info_WS, True, False)
-plot_train_info(train_info_AL, False, True)

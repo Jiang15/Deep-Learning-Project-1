@@ -68,8 +68,7 @@ def train(model, Loss, optimizer, input_tr, target_tr, input_te, target_te, nb_e
             model.zero_grad()
             tmp = Loss.backward(output, target_tr.narrow(0, b, batch_size))
             model.backward(tmp)
-            p = optimizer.update(model.param())
-            model.update(p)
+            optimizer.update()
 
         output_tr = model.forward(input_tr)
         loss_e_tr = Loss.forward(output_tr, target_tr).item()
@@ -102,7 +101,7 @@ def cross_validation(model, optimizer_name, nb_epochs, batch_size, loss, k_fold,
 
         for k in range(k_fold):
             model.reset()
-            optimizer = optimizer_name(parameters = model.param(), lr = lr.item())
+            optimizer = optimizer_name(model = model, lr = lr.item())
             train_indices = indices[k*interval:(k+1)*interval]
             input_te = input[train_indices]
             target_te = target[train_indices]

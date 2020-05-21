@@ -29,7 +29,7 @@ class Module(object):
         """
         Returns a list of pairs consisted of parameters in class and their corresponding gradients.
         """
-        return [[],[]]
+        return []
 
 
     def zero_grad(self):

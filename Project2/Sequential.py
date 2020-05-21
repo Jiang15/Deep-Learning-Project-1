@@ -29,7 +29,3 @@ class Sequential(Module):
         for layer in self.layers:
             layer.reset()
 
-
-    def update(self, param):
-        for p, layer in zip(param, self.layers):
-            layer.update(p)

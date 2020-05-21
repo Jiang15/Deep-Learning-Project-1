@@ -46,20 +46,15 @@ class Linear(Module):
         self.weights.grad = self.weights.grad + torch.mm(grad.t(), self.input.value)
         self.bias.grad = self.bias.grad + grad.sum(0)
         grad_t = torch.mm(grad, self.weights.value)
-
         return grad_t
 
     def param(self):
         """
-
         :return:
         """
         # return self.weights, self.bias
-        output = []
-        output.append([self.weights.value, self.weights.grad])
-        output.append([self.bias.value, self.bias.grad])
-
-        return output
+        p = [self.weights.value,self.weights.grad,self.bias.value, self.bias.grad ]
+        return p
 
     def reset(self):
         in_nodes = self.in_nodes
@@ -69,11 +64,6 @@ class Linear(Module):
         self.bias = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
         self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
         self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
-
-    def update(self, param):
-
-        self.weights.value =  torch.tensor(param[0][0])
-        self.bias.value =  torch.tensor(param[1][0])
 
 
 

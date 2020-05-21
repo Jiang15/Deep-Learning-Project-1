@@ -1,13 +1,15 @@
 import torch
 
 class SGD(object):
-    def __init__(self, parameters, lr):
+    def __init__(self, model, lr):
         self.lr = lr
-        self.parameters = parameters
+        self.model = model
 
     def update(self):
-        for param in self.parameters:
-            param.value = param.value - self.lr * param.grad
+        for layer in self.model.layers:
+            if layer.param()!=[]:
+                layer.weights.value -= self.lr * layer.weights.grad
+                layer.bias.value -= self.lr * layer.bias.grad
 
 
 class MomentumSGD(object):

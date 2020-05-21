@@ -1,19 +1,6 @@
 import _ini_
 import torch
 
-
-class SGD(object):
-    def __init__(self, parameters, lr):
-        self.lr = lr
-        self.parameters = parameters
-
-    def update(self):
-        for param in self.parameters:
-            # print('v ', param.value)
-            # print('g', param.grad)
-            param.value = param.value - self.lr * param.grad
-
-
 class Adam(object):
     def __init__(self, parameters, lr):
         self.beta1 = 0.9
@@ -24,6 +11,7 @@ class Adam(object):
         self.parameters = parameters
         self.m = [torch.zeros(param.grad.size()) for param in self.parameters]
         self.v = [torch.zeros(param.grad.size()) for param in self.parameters]
+
     def update(self):
         for i, param in enumerate(self.parameters):
             self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * param.grad
