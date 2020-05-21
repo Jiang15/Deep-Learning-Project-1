@@ -47,7 +47,7 @@ def evaluate(model, data_loader, auxiliary_loss, criterion):
 
 
 def train(train_data_loader, test_data_loader,
-          model, optimizer, criterion,pbar, AL_weight=0.5,
+          model, optimizer, criterion, pbar = None, AL_weight=0.5,
           epochs=25,  gamma = 0, weight_sharing=False, auxiliary_loss=False):
     """
     Train network model with given parameters
@@ -56,10 +56,10 @@ def train(train_data_loader, test_data_loader,
     :param model: network model to be trained
     :param optimizer: optimizer for training
     :param criterion: loss function for optimizer
+    :param pbar: Progress bar for logging
     :param AL_weight: Weight applied to auxiliary loss when combined with primary task loss
     :param epochs: number of training epochs
-    :param test_every: number of steps between each model evaluation
-    :param gamma: learning rate shceduler's multiplicative factor
+    :param gamma: learning rate scheduler's multiplicative factor
     :param weight_sharing:  boolean flag for applying weight sharing
     :param auxiliary_loss:  boolean flag for applying auxiliary loss
     :return: if aux loss is applied, return primary task accuracies of training and test sets, digit recognition accuracies of traing and test sets, training loss and test(validation) loss
@@ -84,8 +84,9 @@ def train(train_data_loader, test_data_loader,
                 optimizer.step()
                 if gamma != 0 and epoch > 5:
                     scheduler.step()
-                pbar.update(100)
-                 # test step number to determine whether to evaluate network model or not
+                if pbar:
+                    pbar.update(target.shape[0])
+    # evaluate model at the end of last epoch
     model.eval()
     with torch.no_grad():
         if auxiliary_loss: # case with aux loss
@@ -137,7 +138,6 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, trial, batch_s
     mean_acc_aux_te = []
     mean_losses_tr = []
     mean_losses_te = []
-    train_info_mean = []
     nb_channels = 2
     nb_class = 2
     for i in range(trial):
@@ -182,7 +182,7 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, trial, batch_s
 
 
 def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_weight, epochs,
-                     batch_size = 100, test_every = 5, weight_sharing = False, auxiliary_loss = False):
+                     batch_size = 100,  weight_sharing = False, auxiliary_loss = False):
     """
     Perform K-fold cross validation to optimize hyperprameters lr, reg, and/or gamma on the given model with given parameters
     :param k_fold: number of cross validation folds
@@ -194,7 +194,6 @@ def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_we
     :param AL_weight: Weight applied to auxiliary loss when combined with primary task loss
     :param epochs: number of epochs
     :param batch_size: data batch size
-    :param test_every: number of steps between each model evaluation
     :param weight_sharing: boolean flag for applying weight sharing
     :param auxiliary_loss: boolean flag for applying auxiliary loss
     :return: best lr, best reg, best gamma (all based on maximum validation accuracy),
@@ -203,40 +202,29 @@ def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_we
     nb_channels = 2
     nb_class = 2
 
-    train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(1000)
+    train_input, train_target, train_class, _, _, _ = generate_pair_sets(1000) # generate data set
 
-    interval = int(train_input.shape[0]/ k_fold)
-    indices = torch.randperm(train_input.shape[0])
+    interval = int(train_input.shape[0]/ k_fold) # calculate data set size for each fold
+    indices = torch.randperm(train_input.shape[0]) # shuffle data indicies
 
     accuracy_tr_set = []
     accuracy_te_set = []
-    loss_tr_set = []
-    loss_te_set = []
-    train_info_mean_set = []
 
     max_acc_te = 0
-
-
+    counter = 0
     for lr in lr_set:
         for reg in reg_set:
             for gamma in gamma_set:
                 accuracy_tr_k = 0
                 accuracy_te_k = 0
-                loss_tr_k = 0
-                loss_te_k = 0
+                counter += 1
+                print("Running cross validation. Progress:  ", counter/(len(reg_set)*len(lr_set)*len(gamma_set))*100, '%')
 
-                mean_acc_tr = []
-                mean_acc_te = []
-                mean_acc_aux_tr = []
-                mean_acc_aux_te = []
-                mean_losses_tr = []
-                mean_losses_te = []
-
-                train_info_mean = []
                 print('lr = ', lr, 'reg = ', reg, 'gamma = ', gamma)
                 for k in range(k_fold):
+                    # initialize model
                     net = model(nb_channels, nb_class, weight_sharing, auxiliary_loss)
-
+                    # divide data into k-fold and prepare train and validation sets
                     train_indices = indices[k*interval:(k+1)*interval]
                     input_te = train_input[train_indices]
                     target_te = train_target[train_indices]
@@ -253,47 +241,25 @@ def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_we
                                        model=net,
                                        optimizer=optim.Adam(net.parameters(), lr=lr, weight_decay=reg),
                                        criterion=criterion, AL_weight=AL_weight,
-                                       epochs=epochs, test_every=test_every, gamma = gamma,
+                                       epochs=epochs, gamma = gamma,
                                        weight_sharing=weight_sharing,
                                        auxiliary_loss=auxiliary_loss)
-                    if auxiliary_loss:
+                    if auxiliary_loss: # with auxiliary loss
                         accuracy_train, accuracy_test, acc_train_digit, acc_test_digit, losses_tr, losses_te = train_info
-                    else:
+                    else: # no auxiliary loss
                         accuracy_train, accuracy_test, losses_tr, losses_te = train_info
 
-                    accuracy_tr_k += accuracy_train[-1]
-                    accuracy_te_k += accuracy_test[-1]
-                    loss_tr_k += losses_tr[-1]
-                    loss_te_k += losses_te[-1]
-
-                    mean_acc_tr.append(accuracy_train)
-                    mean_acc_te.append(accuracy_test)
-                    mean_losses_tr.append(losses_tr)
-                    mean_losses_te.append(losses_te)
+                    accuracy_tr_k += accuracy_train
+                    accuracy_te_k += accuracy_test
 
                 accuracy_tr_set.append(accuracy_tr_k/k_fold)
                 accuracy_te_set.append(accuracy_te_k/k_fold)
-                loss_tr_set.append(loss_tr_k/k_fold)
-                loss_te_set.append(loss_te_k/k_fold)
-                if accuracy_te_set[-1] > max_acc_te:
+
+                if accuracy_te_set[-1] > max_acc_te:# compare current validation accuracy  with the current maximum
+                    # update hyperparameters associated with max val accuracy and print the new max accuracy
                     max_acc_te = accuracy_te_set[-1]
                     best_lr = lr
                     best_reg = reg
                     best_gamma = gamma
-                    print(max_acc_te)
-
-                if auxiliary_loss:
-                    train_info_mean.append(np.mean(mean_acc_tr,0))
-                    train_info_mean.append(np.mean(mean_acc_te,0))
-                    train_info_mean.append(np.mean(mean_acc_aux_tr,0))
-                    train_info_mean.append(np.mean(mean_acc_aux_te,0))
-                    train_info_mean.append(np.mean(mean_losses_tr,0))
-                    train_info_mean.append(np.mean(mean_losses_te,0))
-
-                else:
-                    train_info_mean.append(np.mean(mean_acc_tr,0))
-                    train_info_mean.append(np.mean(mean_acc_te,0))
-                    train_info_mean.append(np.mean(mean_losses_tr,0))
-                    train_info_mean.append(np.mean(mean_losses_te,0))
-                train_info_mean_set.append(train_info_mean)
-    return best_lr, best_reg, best_gamma, loss_tr_set, loss_te_set, accuracy_tr_set, accuracy_te_set, train_info_mean_set
+                    print(f"Max val acc so far: {max_acc_te}")
+    print(f"Best lr: {best_lr}, Best reg: {best_reg}, Best gamma: {best_gamma}, Max val acc: {max_acc_te}")

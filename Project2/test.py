@@ -3,7 +3,7 @@ import torch
 # from Project2.dataset import generate_disc_set
 from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu, Sigmoid
 from Project2.loss_func import MSELoss, BCELoss
-from Project2.optimizers import  SGD
+from Project2.optimizers import  SGD, AdaGrad
 from Project2.Sequential import Sequential
 from matplotlib import pyplot as plt
 from Project2.helpers import normalize, plotLossAcc, generate_disc_set, train, cross_validation
@@ -31,7 +31,7 @@ model_Tanh = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), 
 # model_Tanh = Sequential(Linear(2,25), Tanh(),Linear(25,2))
 
 # set optimizer and loss
-optimizer_name = SGD
+optimizer_name = AdaGrad
 loss = MSELoss()
 
 ########################################################################################################################
