@@ -4,10 +4,9 @@ import numpy as np
 
 # Definitions of Linear and activation function layers for building network model
 
+#fully connected linear layer
 class Linear(Module):
-    """
-    fully connected linear layer
-    """
+
     def __init__(self, in_nodes, out_nodes):
         """
         initialize a fully connected linear layer
@@ -19,21 +18,14 @@ class Linear(Module):
         self.out_nodes = out_nodes
         self.reset()
 
-    def zero_grad(self):
-        """
-        set weights and bias' gradients to zero
-        """
-        self.weights.grad.zero_()
-        self.bias.grad.zero_()
-
-    def forward(self, x):
+    def forward(self,input):
         """
         apply linear function to input x in forward pass
         :param x: input
         :return: output of linear function
         """
-        self.input.value = x
-        self.result.value = x.matmul(self.weights.value.t()) + self.bias.value
+        self.input.value = input
+        self.result.value = input.matmul(self.weights.value.t()) + self.bias.value
         return self.result.value
 
     def backward(self, grad):
@@ -50,11 +42,17 @@ class Linear(Module):
 
     def param(self):
         """
-        :return:
+        :return list of pair of weights/bias and gradients
         """
-        # return self.weights, self.bias
         p = [[self.weights.value,self.weights.grad],[self.bias.value, self.bias.grad]]
         return p
+
+    def zero_grad(self):
+        """
+        set weights and bias' gradients to zero
+        """
+        self.weights.grad.zero_()
+        self.bias.grad.zero_()
 
     def reset(self):
         in_nodes = self.in_nodes
@@ -65,21 +63,23 @@ class Linear(Module):
         self.result = Parameters(torch.zeros(out_nodes, dtype=torch.float32))
         self.input = Parameters(torch.zeros(in_nodes, dtype=torch.float32))
 
+# ReLU activation function layer
 class Relu(Module):
-    """
-    ReLU activation function layer
-    """
+
     def __init__(self):
         super(Relu, self).__init__()
         self.input = torch.empty(1)
 
     def forward(self, input):
+        '''
+        :param input: input tensor for forward propagation
+        :return: input if input element > 0 else 0
+        '''
         self.input = input
         return input.clamp(min=0)
 
     def backward(self, gradwrtoutput):
         '''
-        ReLU backward:
         The gradient of ReLU is 0 if input<0 else 1
         :param gradwrtoutput: dL/d(output) Tensor with the same shape as input
         :return: dL/d(input): Tensor with the same shape as input
@@ -89,7 +89,23 @@ class Relu(Module):
         grad[self.input <= 0] = 0
         return grad * gradwrtoutput
 
+# Tanh activation function layer
+class Tanh(Module):
+    def __init__(self):
+        super(Tanh, self).__init__()
+        self.input = torch.empty(1)
+
+    def forward(self, input):
+        self.input = input
+        return input.tanh()
+
+    def backward(self, gradwrtoutput):
+        grad = 1 - (self.input.tanh()) ** 2
+        return grad * gradwrtoutput
+
+# Leaky relu activation function
 class Leaky_Relu(Module):
+
     def __init__(self):
         super(Leaky_Relu, self).__init__()
         self.input = torch.empty(1)
@@ -130,16 +146,4 @@ class Sigmoid(Module):
         return derivatives * gradwrtoutput
 
 
-class Tanh(Module):
-    def __init__(self):
-        # self.input = None
-        super(Tanh, self).__init__()
-        self.input = torch.empty(1)
 
-    def forward(self, input):
-        self.input = input
-        return input.tanh()
-
-    def backward(self, gradwrtoutput):
-        grad = 1 - (self.input.tanh()) ** 2
-        return grad * gradwrtoutput

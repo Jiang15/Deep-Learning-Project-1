@@ -7,7 +7,7 @@ class SGD(object):
 
     def update(self):
         for layer in self.model.layers:
-            if layer.param()!=[]:
+            if layer.param() != [[],[]] :
                 layer.weights.value -= self.lr * layer.weights.grad
                 layer.bias.value -= self.lr * layer.bias.grad
 
@@ -59,8 +59,8 @@ class Adam(object):
             param = parameters[n*2:2*n+2]
             for i, p in enumerate(param):
                 if p != []:
-                    m_hat = self.m[2*n + i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
-                    v_hat = self.v[2*n + i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
+                    m_hat = self.m[2*n + i] / (1 - torch.pow(self.beta1, self.iter + 1))
+                    v_hat = self.v[2*n + i] / (1 - torch.pow(self.beta2, self.iter + 1))
                     if i == 0:
                         self.m[2*n + i] = self.beta1 * self.m[2*n + i] + (1 - self.beta1) * layer.weights.grad
                         self.v[2*n + i] = self.beta2 * self.v[2*n + i] + (1 - self.beta2) * layer.weights.grad * layer.weights.grad
