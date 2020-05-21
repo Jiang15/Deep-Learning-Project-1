@@ -1,7 +1,6 @@
 import logging
 import torch
 from torch import optim
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader
