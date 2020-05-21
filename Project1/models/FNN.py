@@ -25,22 +25,22 @@ class FNN(nn.Module):
                                   nn.Softmax(-1))
 
 
-def forward(self, x):
-    _x1 = torch.reshape(x[:, 0, :, :], (-1, 1, 14, 14))
-    _x1 = torch.reshape(_x1, (_x1.shape[0], -1))
-    _x2 = torch.reshape(x[:, 1, :, :], (-1, 1, 14, 14))
-    _x2 = torch.reshape(_x2, (_x2.shape[0], -1))
-    
-    if self.weight_sharing == True:
-        y1 = self.FCnet1(_x1)
-        y2 = self.FCnet1(_x2)
-    else:
-        y1 = self.FCnet1(_x1)
-        y2 = self.FCnet2(_x2)
+    def forward(self, x):
+        _x1 = torch.reshape(x[:, 0, :, :], (-1, 1, 14, 14))
+        _x1 = torch.reshape(_x1, (_x1.shape[0], -1))
+        _x2 = torch.reshape(x[:, 1, :, :], (-1, 1, 14, 14))
+        _x2 = torch.reshape(_x2, (_x2.shape[0], -1))
 
-    y = torch.cat((y1, y2), 1)
-    y = self.fc4(y)
-    if self.auxiliary_loss == True:
-            return y1, y2, y
-    else:
-        return y
+        if self.weight_sharing == True:
+            y1 = self.FCnet1(_x1)
+            y2 = self.FCnet1(_x2)
+        else:
+            y1 = self.FCnet1(_x1)
+            y2 = self.FCnet2(_x2)
+
+        y = torch.cat((y1, y2), 1)
+        y = self.fc4(y)
+        if self.auxiliary_loss == True:
+                return y1, y2, y
+        else:
+            return y
