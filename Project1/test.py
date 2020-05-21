@@ -67,7 +67,7 @@ for i in range(len(auxiliary_loss)):
     std_tr.append(std_acc_tr)
     std_te.append(std_acc_te)
 
- # if not cross validation, print the test results
+ # print the test results
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j], ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])
@@ -99,7 +99,7 @@ for i in range(len(auxiliary_loss)):
     std_tr.append(std_acc_tr)
     std_te.append(std_acc_te)
 
-# if not cross validation, print the test results
+# print the test results
 
 print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
       ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j], ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])
@@ -132,7 +132,7 @@ for i in range(len(auxiliary_loss)):
     std_tr.append(std_acc_tr)
     std_te.append(std_acc_te)
 
-# if not cross validation, print the test results
+# print the test results
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j], ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])
@@ -163,8 +163,7 @@ for i in range(len(auxiliary_loss)):
     mean_te.append(mean_acc_te)
     std_tr.append(std_acc_tr)
     std_te.append(std_acc_te)
-
-# if not cross validation, print the test results
+# print result
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j], ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])

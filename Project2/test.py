@@ -6,8 +6,7 @@ from Project2.loss_func import MSELoss, BCELoss
 from Project2.optimizers import SGD, AdaGrad, Adam
 from Project2.Sequential import Sequential
 from matplotlib import pyplot as plt
-from Project2.helpers import normalize, plotLossAcc, generate_disc_set, train, cross_validation
-
+from Project2.helpers import normalize, plotLossAcc, generate_disc_set, train, cross_validation, one_hot_encoding
 
 ########################################################################################################################
 # initial setups
@@ -16,11 +15,13 @@ nb_epochs = 50
 batch_size = 50
 
 # Generate training and test data sets and normalize
-train_input, train_target= generate_disc_set(1000)
-test_input, test_target = generate_disc_set(1000)
+train_input, train_label= generate_disc_set(1000)
+test_input, test_label = generate_disc_set(1000)
+train_target = one_hot_encoding(train_label)
+test_target = one_hot_encoding(test_label)
 train_input = normalize(train_input)
 test_input = normalize(test_input)
-
+print(train_target)
 # K-fold cross validation to optimize learning rate over range lr_set
 lr_set = torch.logspace(-3, -0.1, 5)
 k_fold = 5
@@ -50,7 +51,7 @@ loss = MSELoss()
 model_Tanh.reset()
 # set up optimizers
 # optimizer_LReLu = optimizer_name(parameters = model_LReLu.param(), lr = best_lr_LReLu)
-optimizer_Tanh = SGD(model = model_Tanh, lr = 0.1)
+optimizer_Tanh = Adam(model = model_Tanh, lr = 0.1)
 # model training
 # loss_train_LReLu, loss_test_LReLu, acc_train_LReLu, acc_test_LReLu = train(model_LReLu, loss, optimizer_LReLu,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)
 loss_train_Tanh, loss_test_Tanh, acc_train_Tanh, acc_test_Tanh = train(model_Tanh, loss, optimizer_Tanh,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)

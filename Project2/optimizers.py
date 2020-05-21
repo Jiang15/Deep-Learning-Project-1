@@ -35,18 +35,18 @@ class Adam(object):
         self.epsilon = 1e-8
         self.iter = 1
         self.model = model
-        self.parameters = model.param()
-        self.m = [torch.zeros(param[1].size()) for param in self.parameters]
-        self.v = [torch.zeros(param[1].size()) for param in self.parameters]
+        self.m = [torch.zeros(len(layer.param()[1])) for layer in self.model.layers]
+        self.v = [torch.zeros(len(layer.param()[1])) for layer in self.model.layers]
 
     def update(self):
-        for i, param in enumerate(self.parameters):
-            if param!= []:
-                self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * param[1]
-                self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * param[1] * param[1]
-                m_hat = self.m[i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
-                v_hat = self.v[i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
-                self.model.layers[i].weights = param[0] - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
+        for i, layer in enumerate(self.model.layers):
+
+            self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * layer.param()[1]
+            self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * layer.param()[1] * layer.param()[1]
+            m_hat = self.m[i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
+            v_hat = self.v[i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
+            if layer.param!= []:
+                layer.weights = layer.param()[0] - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
         self.iter = self.iter + 1
 
 class AdaGrad(object):
