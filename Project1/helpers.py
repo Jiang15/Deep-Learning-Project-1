@@ -4,11 +4,9 @@ from torch import optim
 from tqdm import tqdm
 from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader
-import numpy as np
 
-# set seed
-torch.manual_seed(0)
-np.random.seed(0)
+
+
 
 
 def evaluate(model, data_loader, auxiliary_loss, criterion):
@@ -91,6 +89,7 @@ def train(train_data_loader, test_data_loader,
                 if gamma != 0 and epoch > 5:
                     scheduler.step()
                 if pbar:
+                    pbar.set_postfix(**{'loss (batch)': loss.item()})
                     pbar.update(target.shape[0])
     # evaluate model at the end of last epoch
     model.eval()

@@ -16,7 +16,7 @@ train_input = normalize(train_input)
 test_input = normalize(test_input)
 
 # K-fold cross validation to optimize learning rate over range lr_set
-lr_set = torch.logspace(-1, 0, 5)
+lr_set = torch.logspace(-3, -0.1, 5)
 k_fold = 5
 
 # set loss and optimizer
