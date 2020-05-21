@@ -1,5 +1,5 @@
 from torch import  nn
-from Project1.SiameseNet.model import Siamese
+from Project1.models.Siamese import Siamese
 from Project1.helpers import get_train_stats
 from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader

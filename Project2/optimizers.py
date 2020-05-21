@@ -22,7 +22,6 @@ class MomentumSGD(object):
     def update(self):
         temp = []
         for layers,r in zip(self.model.layers, self.r):
-
             r = self.rho * r - self.lr * param.grad
             temp.append(r)
             param.value =param.value + r
