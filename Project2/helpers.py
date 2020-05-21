@@ -6,7 +6,6 @@ from torch import empty
 # set seed for data generation
 torch.manual_seed(0)
 
-
 def generate_disc_set(nb):
     """
     generate data and label
@@ -32,9 +31,7 @@ def one_hot_encoding(label):
             target[i][0] = 1
         else:
             target[i][1] = 1
-
-    return pts, target
-
+    return target
 
 
 def normalize(data):
