@@ -6,19 +6,19 @@ from Project2.loss_func import MSELoss
 
 torch.manual_seed(0)
 
-
 def generate_disc_set(nb):
     pts = empty(nb, 2).uniform_(0, 1)
     label = (-((pts-0.5).pow(2).sum(1)-(1 / (2 * math.pi))).sign()+1)/2 # take reversed sign of subtraction with 2/pi then add 1 and divide by 2 then reverse
-    target = torch.zeros(nb, 2)
+    return pts, label
+
+def one_hot_encoding(label):
+    target = torch.zeros(len(label), 2)
     for i in range(len(label)):
         if label[i] == 0:
             target[i][0] = 1
         else:
             target[i][1] = 1
-
-    return pts, target
-
+    return target
 
 def normalize(x):
     mean_x=x.mean()
