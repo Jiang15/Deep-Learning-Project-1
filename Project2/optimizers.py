@@ -24,7 +24,7 @@ class MomentumSGD(object):
         for layers,r in zip(self.model.layers, self.r):
             r = self.rho * r - self.lr * param.grad
             temp.append(r)
-            param.value =param.value + r
+            param.value = param.value + r
         self.r = temp
 
 class Adam(object):
@@ -46,10 +46,8 @@ class Adam(object):
                 self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * param[1] * param[1]
                 m_hat = self.m[i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
                 v_hat = self.v[i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
-
                 self.model.layers[i].weights = param[0] - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
         self.iter = self.iter + 1
-
 
 class AdaGrad(object):
     def __init__(self, parameters, lr,delta = 0.1):

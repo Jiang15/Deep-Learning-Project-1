@@ -50,7 +50,7 @@ loss = MSELoss()
 model_Tanh.reset()
 # set up optimizers
 # optimizer_LReLu = optimizer_name(parameters = model_LReLu.param(), lr = best_lr_LReLu)
-optimizer_Tanh = Adam(model = model_Tanh, lr = 0.1)
+optimizer_Tanh = SGD(model = model_Tanh, lr = 0.1)
 # model training
 # loss_train_LReLu, loss_test_LReLu, acc_train_LReLu, acc_test_LReLu = train(model_LReLu, loss, optimizer_LReLu,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)
 loss_train_Tanh, loss_test_Tanh, acc_train_Tanh, acc_test_Tanh = train(model_Tanh, loss, optimizer_Tanh,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)

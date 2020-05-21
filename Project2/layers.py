@@ -53,8 +53,7 @@ class Linear(Module):
         :return:
         """
         # return self.weights, self.bias
-        p = [[self.weights.value,self.bias.value],[self.weights.grad, self.bias.grad]]
-        return p
+        return [[self.weights.value,self.weights.grad],[self.bias.value, self.bias.grad]]
 
     def reset(self):
         in_nodes = self.in_nodes
