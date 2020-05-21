@@ -1,6 +1,4 @@
 import torch
-
-# from Project2.dataset import generate_disc_set
 from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu, Sigmoid
 from Project2.loss_func import MSELoss, BCELoss
 from Project2.optimizers import SGD, AdaGrad, Adam, MomentumSGD

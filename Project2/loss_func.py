@@ -1,5 +1,4 @@
 import torch
-import math
 
 from Project2.Module import Module
 
