@@ -3,7 +3,7 @@ import torch
 # from Project2.dataset import generate_disc_set
 from Project2.layers import Linear, Relu, Tanh, Leaky_Relu, Elu, Sigmoid
 from Project2.loss_func import MSELoss, BCELoss
-from Project2.optimizers import SGD, AdaGrad, Adam
+from Project2.optimizers import SGD, AdaGrad, Adam, MomentumSGD
 from Project2.Sequential import Sequential
 from matplotlib import pyplot as plt
 from Project2.helpers import normalize, plotLossAcc, generate_disc_set, train, cross_validation
@@ -31,7 +31,7 @@ model_Tanh = Sequential(Linear(2,25),Tanh(),Linear(25,50),Tanh(),Linear(50,25), 
 # model_Tanh = Sequential(Linear(2,25), Tanh(),Linear(25,2))
 
 # set optimizer and loss
-optimizer_name = AdaGrad
+optimizer_name = Adam
 loss = MSELoss()
 ########################################################################################################################
 # cross validation and plot
@@ -50,7 +50,7 @@ loss = MSELoss()
 model_Tanh.reset()
 # set up optimizers
 # optimizer_LReLu = optimizer_name(parameters = model_LReLu.param(), lr = best_lr_LReLu)
-optimizer_Tanh = Adam(model = model_Tanh, lr = 0.1)
+optimizer_Tanh = optimizer_name(model = model_Tanh, lr = 0.0006)
 # model training
 # loss_train_LReLu, loss_test_LReLu, acc_train_LReLu, acc_test_LReLu = train(model_LReLu, loss, optimizer_LReLu,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)
 loss_train_Tanh, loss_test_Tanh, acc_train_Tanh, acc_test_Tanh = train(model_Tanh, loss, optimizer_Tanh,train_input,train_target,test_input,test_target, nb_epochs = nb_epochs, batch_size=batch_size)

@@ -18,14 +18,22 @@ class MomentumSGD(object):
         self.model = model
         self.r=[]
         for param in model.param():
-            self.r.append(torch.zeros_like(param.value))
+            if param != []:
+                self.r.append(torch.zeros_like(param[0]))
+            else:
+                self.r.append([])
     def update(self):
-        temp = []
-        for layers,r in zip(self.model.layers, self.r):
-            r = self.rho * r - self.lr * param.grad
-            temp.append(r)
-            param.value =param.value + r
-        self.r = temp
+        parameters = self.model.param()
+        for n, layer in enumerate(self.model.layers):
+            param = parameters[n*2:2*n+2]
+            for i, p in enumerate(param):
+                if p != []:
+                    if i == 0:
+                        self.r[n*2+i] = self.rho * self.r[n*2+i] + layer.weights.grad
+                        layer.weights.value = layer.weights.value - self.lr * self.r[n*2+i]
+                    else:
+                        self.r[n*2+i] = self.rho * self.r[n*2+i] + layer.bias.grad
+                        layer.bias.value = layer.bias.value - self.lr * self.r[n*2+i]
 
 class Adam(object):
     def __init__(self, model, lr):
@@ -35,43 +43,57 @@ class Adam(object):
         self.epsilon = 1e-8
         self.iter = 1
         self.model = model
-        self.parameters = model.param()
-        self.m = [torch.zeros(param[1].size()) for param in self.parameters]
-        self.v = [torch.zeros(param[1].size()) for param in self.parameters]
+        self.m = []
+        self.v = []
+        for param in self.model.param():
+            if param != []:
+                self.m.append(torch.zeros(param[1].size()))
+                self.v.append(torch.zeros(param[1].size()))
+            else:
+                self.m.append([])
+                self.v.append([])
 
     def update(self):
-        for i, param in enumerate(self.parameters):
-            if param!= []:
-                self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * param[1]
-                self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * param[1] * param[1]
-                m_hat = self.m[i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
-                v_hat = self.v[i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
-
-                self.model.layers[i].weights = param[0] - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
+        for n, layer in enumerate(self.model.layers):
+            parameters = self.model.param()
+            param = parameters[n*2:2*n+2]
+            for i, p in enumerate(param):
+                if p != []:
+                    m_hat = self.m[2*n + i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
+                    v_hat = self.v[2*n + i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
+                    if i == 0:
+                        self.m[2*n + i] = self.beta1 * self.m[2*n + i] + (1 - self.beta1) * layer.weights.grad
+                        self.v[2*n + i] = self.beta2 * self.v[2*n + i] + (1 - self.beta2) * layer.weights.grad * layer.weights.grad
+                        layer.weights.value = layer.weights.value - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
+                    else:
+                        self.m[2*n + i] = self.beta1 * self.m[2*n + i] + (1 - self.beta1) * layer.bias.grad
+                        self.v[2*n + i] = self.beta2 * self.v[2*n + i] + (1 - self.beta2) * layer.bias.grad * layer.bias.grad
+                        layer.bias.value = layer.bias.value - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
         self.iter = self.iter + 1
 
-
 class AdaGrad(object):
-    def __init__(self, parameters, lr,delta = 0.1):
+    def __init__(self, model, lr,delta = 0.1):
         self.lr = lr
         self.delta=delta
-        self.parameters = parameters
+        self.model = model
         self.r=[]
-        for param in parameters:
+
+        for param in self.model.param():
             if param != []:
                 self.r.append(torch.zeros_like(param[0]))
             else:
                 self.r.append([])
 
-    def update(self, parameters):
-        temp = []
-        for n in range(len(self.r)//2):
+    def update(self):
+        for n, layer in enumerate(self.model.layers):
+            parameters = self.model.param()
             param = parameters[n*2:2*n+2]
-            new_p = []
             for i, p in enumerate(param):
                 if p != []:
-                    self.r[n*2+i] = self.r[n*2+i]+ torch.mul(p[1], p[1])
-                    p[0] =p[0]-self.lr * p[1] /(self.delta + torch.sqrt(self.r[n*2+i]))
-                new_p.append(p)
-            temp.append(new_p)
-        return temp
+                    # p[0] =p[0]-self.lr * p[1] /(self.delta + torch.sqrt(self.r[n*2+i]))
+                    if i == 0:
+                        self.r[n*2+i] = self.r[n*2+i]+ torch.mul(layer.weights.grad, layer.weights.grad)
+                        layer.weights.value = layer.weights.value -self.lr * layer.weights.grad/(self.delta + torch.sqrt(self.r[n*2+i]))
+                    else:
+                        self.r[n*2+i] = self.r[n*2+i]+ torch.mul(layer.bias.grad, layer.bias.grad)
+                        layer.bias.value = layer.bias.value -self.lr * layer.bias.grad/(self.delta + torch.sqrt(self.r[n*2+i]))

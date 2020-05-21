@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 ########################################################################################################################
 # Initial setups
 
-run_cross_validation = False # boolean flag: True to run cross validation; False to run training and testing
+run_cross_validation = True # boolean flag: True to run cross validation; False to run training and testing
 # generate train and test sets
 N = 1000
 train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(N)

@@ -20,7 +20,7 @@ class MomentumSGD(Module):
         self.r=[]
         for param in parameters:
             self.r.append(torch.zeros_like(param.value))
-    def step(self):
+    def update(self):
         for param,r in zip(self.parameters,self.r):
             r = self.rho * r + param.grad
             param.value =param.value- self.lr* r
