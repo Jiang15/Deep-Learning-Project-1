@@ -17,6 +17,7 @@ class Sequential(Module):
     def zero_grad(self):
         for layer in self.layers:
             layer.zero_grad()
+
     def param(self):
         parameter = []
         for layer in self.layers:
