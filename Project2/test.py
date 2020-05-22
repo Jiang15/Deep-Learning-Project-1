@@ -6,7 +6,7 @@ from model.optimizers import SGD
 from model.Sequential import Sequential
 from helpers import normalize, generate_disc_set, train, cross_validation, one_hot_encoding
 
-torch.manual_seed(0)
+torch.manual_seed(100)
 # Generate training and test data sets and normalize
 train_input, train_label = generate_disc_set(1000)
 test_input, test_label = generate_disc_set(1000)
@@ -20,7 +20,7 @@ lr_set = torch.logspace(-1, 0, 5)
 k_fold = 5
 
 # set loss and optimizer
-nb_epochs = 50
+nb_epochs = 100
 batch_size = 50
 loss = MSELoss()
 optimizer_name = SGD

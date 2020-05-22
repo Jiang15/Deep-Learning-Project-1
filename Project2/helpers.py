@@ -203,30 +203,3 @@ def train_cv(model, Loss, optimizer, input_tr, target_tr, input_te, target_te, n
     return loss_history_tr, loss_history_te, acc_history_tr, acc_history_te
 
 
-def plotLossAcc(loss_tr, loss_te, acc_tr, acc_te, x_var, xlabel):
-    """
-    Plot the loss accuracy
-    :param loss_tr: training loss
-    :param loss_te: testing loss
-    :param acc_tr: trainig accuracy
-    :param acc_te: testing accuracy
-    :param x_var: variable for x axis
-    :param xlabel: label for x axis
-    :plot the training, validation loss and their accuracy
-    """
-    fig, ax1 = plt.subplots()
-    color_tr = 'tab:green'
-    color_te = 'tab:blue'
-    color_tra = 'tab:orange'
-    color_tea = 'tab:purple'
-    ax1.set_xlabel(xlabel)
-    ax1.plot(x_var, loss_tr, color=color_tr)
-    ax1.plot(x_var, loss_te, color=color_te)
-    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.plot(x_var, acc_tr, color=color_tra)
-    ax2.plot(x_var, acc_te, color=color_tea)
-
-    ax1.legend(['train_loss', 'validation_loss'])
-    ax2.legend(['train_accuracy', 'validation_accuracy'], loc='lower right')
-
-    ax1.set_title("Validation Accuracy = " + str(acc_te[-1]))
