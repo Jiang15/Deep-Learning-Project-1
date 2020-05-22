@@ -72,7 +72,7 @@ class Adam(object):
         self.iter = self.iter + 1
 
 class AdaGrad(object):
-    def __init__(self, model, lr,delta = 0.1):
+    def __init__(self, model, lr,delta = 1e-6):
         self.lr = lr
         self.delta=delta
         self.model = model
