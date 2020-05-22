@@ -1,4 +1,4 @@
-# Weight sharing and auxiliary losses for classification
+# Mini deep-learning framework building by pytorch
 | Student's name | SCIPER |
 | -------------- | ------ |
 | Wei Jiang | 313794  |
@@ -19,6 +19,7 @@ neural-network modules.
   - `Module.py`: condtains model for layers
   - `Sequential.py`: condtains Sequential function to connect different layers
 - `helpers.py`: contains helper functions for training and testing
+- `visualization.ipynb`: contains the result of all models with the different combination and the comparison of loss convergence among activation functions and optimizers.
 - `test.py`: run to train and test model with three hidden layers of 25 units using SGD as optimizer, MES loss as loss function and Relu, Tanh as activation function.  
 
 
