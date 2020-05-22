@@ -1,4 +1,4 @@
-# Weight sharing and auxiliary losses for classification
+# Mini deep-learning framework built by pytorch
 | Student's name | SCIPER |
 | -------------- | ------ |
 | Wei Jiang | 313794  |
