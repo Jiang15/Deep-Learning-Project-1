@@ -1,18 +1,34 @@
 import torch
 
 class SGD(object):
+    """Stochastic gradient descent optimizer"""
     def __init__(self, model, lr):
+        """
+        initialize optimizer
+        :param model: model to be optimized
+        :param lr: learning rate
+        """
         self.lr = lr
         self.model = model
 
     def update(self):
+        """
+        update model parameters
+        """
         for layer in self.model.layers:
-            if layer.param() != [[],[]] :
-                layer.weights.value -= self.lr * layer.weights.grad
-                layer.bias.value -= self.lr * layer.bias.grad
+            if layer.param() != [[],[]] : # skip parameterless activation function layer to get to linear layer
+                layer.weights.value -= self.lr * layer.weights.grad # update weights value
+                layer.bias.value -= self.lr * layer.bias.grad # update bias value
 
 class MomentumSGD(object):
+    """Momentum SGD optimizer"""
     def __init__(self, model, lr, rho = 0.85):
+        """
+        initialize optimzier
+        :param model: model to be optimized
+        :param lr: learning rate
+        :param rho: decay factor
+        """
         self.lr= lr
         self.rho = rho
         self.model = model
@@ -22,21 +38,31 @@ class MomentumSGD(object):
                 self.r.append(torch.zeros_like(param[0]))
             else:
                 self.r.append([])
+
     def update(self):
+        """
+        update model parameters
+        """
         parameters = self.model.param()
         for n, layer in enumerate(self.model.layers):
-            param = parameters[n*2:2*n+2]
+            param = parameters[n*2:2*n+2] # two parameters in current layer
             for i, p in enumerate(param):
-                if p != []:
-                    if i == 0:
-                        self.r[n*2+i] = self.rho * self.r[n*2+i] + layer.weights.grad
-                        layer.weights.value = layer.weights.value - self.lr * self.r[n*2+i]
-                    else:
-                        self.r[n*2+i] = self.rho * self.r[n*2+i] + layer.bias.grad
-                        layer.bias.value = layer.bias.value - self.lr * self.r[n*2+i]
+                if p != []: # skip parameterless layer
+                    if i == 0: # first parameter is weights
+                        self.r[n*2+i] = self.rho * self.r[n*2+i] - self.lr * layer.weights.grad
+                        layer.weights.value = layer.weights.value + self.r[n*2+i]
+                    else: # second parameter is bias
+                        self.r[n*2+i] = self.rho * self.r[n*2+i] - self.lr * layer.bias.grad
+                        layer.bias.value = layer.bias.value + self.r[n*2+i]
 
 class Adam(object):
+    """Adaptive moment estimation optimizer"""
     def __init__(self, model, lr):
+        """
+        initialize optimimzer
+        :param model: model to be optimized
+        :param lr: learning rate
+        """
         self.beta1 = 0.9
         self.beta2 = 0.999
         self.lr = lr
@@ -54,27 +80,38 @@ class Adam(object):
                 self.v.append([])
 
     def update(self):
+        """
+        update model parameters
+        """
         for n, layer in enumerate(self.model.layers):
             parameters = self.model.param()
-            param = parameters[n*2:2*n+2]
+            param = parameters[n*2:2*n+2] # two parameters in current layer
             for i, p in enumerate(param):
-                if p != []:
+                if p != []: # skip paramterless layer
                     m_hat = self.m[2*n + i] / (1 - torch.pow(self.beta1, torch.FloatTensor([self.iter + 1])))
                     v_hat = self.v[2*n + i] / (1 - torch.pow(self.beta2, torch.FloatTensor([self.iter + 1])))
-                    if i == 0:
+                    if i == 0:# first parameter is weights
                         self.m[2*n + i] = self.beta1 * self.m[2*n + i] + (1 - self.beta1) * layer.weights.grad
                         self.v[2*n + i] = self.beta2 * self.v[2*n + i] + (1 - self.beta2) * layer.weights.grad * layer.weights.grad
                         layer.weights.value = layer.weights.value - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
-                    else:
+                    else:# second parameter is bias
                         self.m[2*n + i] = self.beta1 * self.m[2*n + i] + (1 - self.beta1) * layer.bias.grad
                         self.v[2*n + i] = self.beta2 * self.v[2*n + i] + (1 - self.beta2) * layer.bias.grad * layer.bias.grad
                         layer.bias.value = layer.bias.value - self.lr * m_hat / (torch.sqrt(v_hat) + self.epsilon)
         self.iter = self.iter + 1
 
 class AdaGrad(object):
-    def __init__(self, model, lr,delta = 1e-6):
+    """Adaptive gradient optimizer"""
+    def __init__(self, model, lr, gamma = 0.3):
+        """
+        initialize optimizer
+        :param model: model to be optimized
+        :param lr: learning rate
+        :param gamma: weight for the addition of the last and current gradient
+        """
         self.lr = lr
-        self.delta=delta
+        self.epsilon = 1e-6
+        self.gamma = gamma
         self.model = model
         self.r=[]
 
@@ -85,15 +122,17 @@ class AdaGrad(object):
                 self.r.append([])
 
     def update(self):
+        """
+        update model parameters
+        """
         for n, layer in enumerate(self.model.layers):
             parameters = self.model.param()
-            param = parameters[n*2:2*n+2]
+            param = parameters[n*2:2*n+2] # two parameters in current layer
             for i, p in enumerate(param):
-                if p != []:
-                    # p[0] =p[0]-self.lr * p[1] /(self.delta + torch.sqrt(self.r[n*2+i]))
-                    if i == 0:
-                        self.r[n*2+i] = self.r[n*2+i]+ torch.mul(layer.weights.grad, layer.weights.grad)
-                        layer.weights.value = layer.weights.value -self.lr * layer.weights.grad/(self.delta + torch.sqrt(self.r[n*2+i]))
-                    else:
+                if p != []:# skip paramterless layer
+                    if i == 0:# first parameter is weights
+                        self.r[n*2+i] = self.gamma*(self.r[n*2+i])+ (1-self.gamma)*torch.mul(layer.weights.grad, layer.weights.grad)
+                        layer.weights.value = layer.weights.value -self.lr * layer.weights.grad/(self.epsilon + torch.sqrt(self.r[n*2+i]))
+                    else:# second parameter is bias
                         self.r[n*2+i] = self.r[n*2+i]+ torch.mul(layer.bias.grad, layer.bias.grad)
-                        layer.bias.value = layer.bias.value -self.lr * layer.bias.grad/(self.delta + torch.sqrt(self.r[n*2+i]))
+                        layer.bias.value = layer.bias.value -self.lr * layer.bias.grad/(self.epsilon + torch.sqrt(self.r[n*2+i]))
