@@ -1,6 +1,7 @@
 import torch
 from Module import Module, Parameters
 import numpy as np
+
 # Definitions of Linear and activation function layers for building network model
 
 #fully connected linear layer
