@@ -12,17 +12,16 @@ neural-network modules.
 
 
 ### Folders and Files
-- `models`:
-  - `FNN.py`: contains FNN model
-  - `RCNN.py`: contains RCNN model
-  - `ResNet.py`: condtains ResNet model
-  - `Siamese.py`: condtains SiameseNet model
+- `model`:
+  - `layers.py`: contains Linear for fully connected layer, Relu, Tanh, Leaky Relu, Exponential Relu and Sigmoid activation function layers.
+  - `loss_func.py`: contains MSE loss function
+  - `optimizers.py`: condtains SGD, moment SGD, Adagrad, Adam optmizers
+  - `Module.py`: condtains model for layers
+  - `Sequential.py`: condtains Sequential function to connect different layers
 - `helpers.py`: contains helper functions for training and testing
-- `test.py`: run to traininng the four models. It trains each models for 11 rounds and 25 epochs in each round.  
+- `test.py`: run to train and test model with three hidden layers of 25 units using SGD as optimizer, MES loss as loss function and Relu, Tanh as activation function.  
 
 
   
 ## Getting Started
-- Run `test.py` to train the four models. Mean loss and accuracy and its standard deviation for training and testing will print at the end for three cases: simple structure, structure with weight sharing and auxiliary loss for each model.
-
-- Cross validation: If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
+- Run `test.py` to train and test the model with 50 epochs. Cross validation is automatically run for get best learning rate. The MSE loss, training and testing error is logging for each epoch. Final training and testing error is printed at the end.
