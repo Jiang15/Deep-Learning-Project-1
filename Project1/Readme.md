@@ -25,4 +25,3 @@ The objective of this project is to test different architectures to compare two 
 - Run `test.py` to train the four models. Mean accuracy and its standard deviation for training and testing will print at the end for three cases: simple structure, structure with weight sharing and auxiliary loss for each model.
 
 - Cross validation: If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
-
