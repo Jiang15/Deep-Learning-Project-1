@@ -1,8 +1,8 @@
 import logging
 import torch
-from Project2.layers import Linear, Relu, Tanh, Sigmoid
+from Project2.layers import Linear, Relu, Tanh
 from Project2.loss_func import MSELoss
-from Project2.optimizers import SGD, Adam, AdaGrad, MomentumSGD
+from Project2.optimizers import SGD
 from Project2.Sequential import Sequential
 from Project2.helpers import normalize, generate_disc_set, train, cross_validation, one_hot_encoding
 
@@ -12,8 +12,8 @@ train_input, train_label = generate_disc_set(1000)
 test_input, test_label = generate_disc_set(1000)
 train_target = one_hot_encoding(train_label)
 test_target = one_hot_encoding(test_label)
-# train_input = normalize(train_input)
-# test_input = normalize(test_input)
+train_input = normalize(train_input)
+test_input = normalize(test_input)
 
 # K-fold cross validation to optimize learning rate over range lr_set
 lr_set = torch.logspace(-1, 0, 5)
@@ -23,17 +23,16 @@ k_fold = 5
 nb_epochs = 50
 batch_size = 50
 loss = MSELoss()
-optimizer_name = AdaGrad
+optimizer_name = SGD
 
 # create models
 model = Sequential(Linear(2, 25), Relu(), Linear(25, 25), Relu(), Linear(25, 25), Relu(), Linear(25, 2), Tanh())
 
 # cross validation to find best learning rate
 print("cross validation to get best leaning rate for model")
-# best_lr = cross_validation(model, optimizer_name, nb_epochs, batch_size,
-#                            loss, k_fold, lr_set, train_input, train_target)
+best_lr = cross_validation(model, optimizer_name, nb_epochs, batch_size,
+                           loss, k_fold, lr_set, train_input, train_target)
 
-best_lr = 0.005
 # initialize models
 optimizer = optimizer_name(model=model, lr=best_lr)
 # logging info
