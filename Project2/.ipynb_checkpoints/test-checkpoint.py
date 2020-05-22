@@ -1,9 +1,9 @@
 import logging
 import torch
-from Project2.layers import Linear, Relu, Tanh
-from Project2.loss_func import MSELoss
-from Project2.optimizers import SGD
-from Project2.Sequential import Sequential
+from Project2.model.layers import Linear, Relu, Tanh
+from Project2.model.loss_func import MSELoss
+from Project2.model.optimizers import SGD
+from Project2.model.Sequential import Sequential
 from Project2.helpers import normalize, generate_disc_set, train, cross_validation, one_hot_encoding
 
 torch.manual_seed(0)

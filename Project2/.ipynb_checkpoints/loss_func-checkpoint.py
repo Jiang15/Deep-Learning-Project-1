@@ -1,6 +1,6 @@
 import torch
 
-from Project2.Module import Module
+from Project2.model.Module import Module
 
 
 class MSELoss(Module):

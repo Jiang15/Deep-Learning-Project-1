@@ -1,4 +1,4 @@
-from Project2.Module import Module
+from Project2.model.Module import Module
 
 
 class Sequential(Module):

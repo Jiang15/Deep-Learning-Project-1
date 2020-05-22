@@ -1,13 +1,12 @@
 import torch
 from torch import nn
-
-from Project1.models import RCNN
-from Project1.models.Siamese import Siamese
-from Project1.models.RCNN import CNN
-from Project1.models.FNN import FNN
-from Project1.models.Resnet import ResNet
-from Project1.helpers import get_train_stats, cross_validation
-from dlc_practical_prologue import generate_pair_sets
+import logging
+from models.Siamese import Siamese
+from models.CNN import CNN
+from models.FNN import FNN
+from models.Resnet import ResNet
+from helpers import get_train_stats, cross_validation
+from dataset import generate_pair_sets
 from torch.utils.data import DataLoader
 
 # Initial setups
@@ -45,7 +44,7 @@ std_te = []
 #FNN: Run cross validation or training and testing
 AL_weight = 0.4
 model = FNN
-print("FNN Model\n")
+logging.info("-- Training for FNN Model--\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -57,7 +56,7 @@ if run_cross_validation:  # Run cross validation to help select optimal hyperpar
 
 #train and test the model
 #hyperparameters for training and testing
-reg = [0.05, 0.06, 0.06]  # weight decay factor
+reg = [0.05, 0.03, 0.06]  # weight decay factor
 lr = [0.003, 0.005, 0.003]  # learning rate
 gamma = [0, 0, 0]  # learing rate scheduler's multiplicative factor
 
@@ -72,6 +71,7 @@ for i in range(len(auxiliary_loss)):
     std_te.append(std_acc_te)
 
 #print the test results
+logging.info("-- Result for FNN Model--\n")
 for j in range(len(auxiliary_loss)):
     print("\n Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j],
@@ -81,7 +81,7 @@ for j in range(len(auxiliary_loss)):
 #Siamese: Run cross validation or training and testing
 AL_weight = 1
 model = Siamese
-print("SiameseNet Model\n")
+logging.info("-- Training for SiameseNet Model--\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -108,6 +108,7 @@ for i in range(len(auxiliary_loss)):
     std_te.append(std_acc_te)
 
 # print the test results
+logging.info("-- Result for SiameseNet Model--\n")
 print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
       ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j],
       ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])
@@ -119,7 +120,7 @@ print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[
 #
 AL_weight = 1
 model = CNN
-print("CNN Model\n")
+logging.info("-- Training for CNN Model--\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -146,6 +147,7 @@ for i in range(len(auxiliary_loss)):
     std_te.append(std_acc_te)
 
 # print the test results
+logging.info("-- Result for CNN Model--\n")
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j],
@@ -154,7 +156,7 @@ for j in range(len(auxiliary_loss)):
 # ########################################################################################################################
 # # ResNet: Run cross validation or training and testing
 AL_weight = 0.5
-print("ResNet Model\n")
+logging.info("-- Training for Resnet Model--\n")
 model = ResNet
 
 # Run cross validation to help select optimal hyperparameter
@@ -183,6 +185,7 @@ for i in range(len(auxiliary_loss)):
     std_te.append(std_acc_te)
 
 # print result
+logging.info("-- Result for ResNet Model--\n")
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j],
