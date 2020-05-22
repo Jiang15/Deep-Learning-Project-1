@@ -1,5 +1,7 @@
 import torch
 from torch import nn
+
+from Project1.models import RCNN
 from Project1.models.Siamese import Siamese
 from Project1.models.RCNN import CNN
 from Project1.models.FNN import FNN
@@ -8,11 +10,11 @@ from Project1.helpers import get_train_stats, cross_validation
 from dlc_practical_prologue import generate_pair_sets
 from torch.utils.data import DataLoader
 
-########################################################################################################################
 # Initial setups
 # set seed
 torch.manual_seed(0)
-run_cross_validation = True  # boolean flag: True to run cross validation; False to run training and testing
+# boolean flag: True to run cross validation; False to run training and testing
+run_cross_validation = False
 # generate train and test sets
 N = 1000
 train_input, train_target, train_class, test_input, test_target, test_class = generate_pair_sets(N)
@@ -34,18 +36,16 @@ trial = 11
 weight_sharing = [False, True, False]
 auxiliary_loss = [False, False, True]
 # auxiliary loss weighting
-AL_weight = 1
 
 mean_tr = []
 mean_te = []
 std_tr = []
 std_te = []
 
-########################################################################################################################
 #FNN: Run cross validation or training and testing
+AL_weight = 0.4
 model = FNN
-print("FNN Model")
-print()
+print("FNN Model\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -57,8 +57,8 @@ if run_cross_validation:  # Run cross validation to help select optimal hyperpar
 
 #train and test the model
 #hyperparameters for training and testing
-reg = [0.001, 0.001, 0.001]  # weight decay factor
-lr = [0.01, 0.01, 0.01]  # learning rate
+reg = [0.05, 0.06, 0.06]  # weight decay factor
+lr = [0.003, 0.005, 0.003]  # learning rate
 gamma = [0, 0, 0]  # learing rate scheduler's multiplicative factor
 
 for i in range(len(auxiliary_loss)):
@@ -73,15 +73,15 @@ for i in range(len(auxiliary_loss)):
 
 #print the test results
 for j in range(len(auxiliary_loss)):
-    print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
+    print("\n Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
           ", Train Accuracy: Mean = %.2f" % mean_tr[j], ", STD = %.2f" % std_tr[j],
           ", Test Accuracy: Mean = %.2f" % mean_te[j], "STD = %.2f" % std_te[j])
 
 #######################################################################################################################
 #Siamese: Run cross validation or training and testing
+AL_weight = 1
 model = Siamese
-print("SiameseNet Model")
-print()
+print("SiameseNet Model\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -117,6 +117,9 @@ print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[
 # print("CNN Model")
 # model = CNN
 #
+AL_weight = 1
+model = CNN
+print("CNN Model\n")
 if run_cross_validation:  # Run cross validation to help select optimal hyperparameter
     k_fold = 5
     lr_set = [0.0001, 0.001, 0.01, 0.1]  # learning rate range for cross validation
@@ -150,7 +153,8 @@ for j in range(len(auxiliary_loss)):
 #
 # ########################################################################################################################
 # # ResNet: Run cross validation or training and testing
-print("ResNet Model")
+AL_weight = 0.5
+print("ResNet Model\n")
 model = ResNet
 
 # Run cross validation to help select optimal hyperparameter
@@ -164,9 +168,9 @@ for i in range(len(auxiliary_loss)):
 
 # train and test the model
 # hyperparameters for training and testing
-reg = [0.001, 0.001, 0.001]  # weight decay factor
-lr = [0.01, 0.01, 0.01]  # learning rate
-gamma = [0, 0, 0]  # learing rate scheduler's multiplicative factor
+reg = [0.001, 0.002, 0.001]  # weight decay factor
+lr = [0.0035, 0.0035, 0.001]  # learning rate
+gamma = [0.1, 0.2, 0.1]  # learing rate scheduler's multiplicative factor
 
 for i in range(len(auxiliary_loss)):
     mean_acc_tr, std_acc_tr, mean_acc_te, std_acc_te = get_train_stats(model, lr[i], reg[i], cross_entropy,
@@ -177,6 +181,7 @@ for i in range(len(auxiliary_loss)):
     mean_te.append(mean_acc_te)
     std_tr.append(std_acc_tr)
     std_te.append(std_acc_te)
+
 # print result
 for j in range(len(auxiliary_loss)):
     print("Auxiliary loss: ", auxiliary_loss[j], ", weight sharing", weight_sharing[j],
