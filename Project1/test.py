@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 # set seed
 torch.manual_seed(0)
 # boolean flag: True to run cross validation; False to run training and testing
-run_cross_validation = True
+run_cross_validation = False
 
 # generate train and test sets
 N = 1000
