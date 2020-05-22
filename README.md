@@ -10,6 +10,7 @@ The objective of this project is to test different architectures to compare two 
 
 
 ### Folders and Files
+- `models`:
   - `metric.py`: contains evaluation metric for quality measurement
   - `train.py`: run this file to train the model on GPU
   - `test.py`: run this file to apply the trained model to given image files in `testset\` and save the generated mask in `test_mask.tif`
