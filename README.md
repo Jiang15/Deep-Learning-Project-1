@@ -11,7 +11,7 @@ The objective of this project is to test different architectures to compare two 
 
 ### Folders and Files
 - `models`:
-  - `FNN.py`: contains FNN model
+  -- `FNN.py`: contains FNN model
   - `RCNN.py`: contains RCNN model
   - `ResNet.py`: condtains ResNet model
   - `Siamese.py`: condtains SiameseNet model
@@ -23,5 +23,5 @@ The objective of this project is to test different architectures to compare two 
 ## Getting Started
 - Run `test.py` to train the four models. Mean loss and accucy and its standard deviation will print at the end for three cases: simple structure, structure with weight sharing and auxiliary loss.  
 
-If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
+- Cross validation: If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
 
