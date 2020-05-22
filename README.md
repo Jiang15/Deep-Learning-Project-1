@@ -16,7 +16,7 @@ The objective of this project is to test different architectures to compare two 
   - `ResNet.py`: condtains ResNet model
   - `Siamese.py`: condtains SiameseNet model
 - `helpers.py`: contains helper functions for training and testing
-- `test.py`: run to traininng the four models. It trains each models for 11 rounds and 25 epochs in each round.  
+- `test.py`: run to train and test the four models. It trains each models for 11 rounds and 25 epochs in each round.  
 
 
   
