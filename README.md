@@ -16,9 +16,11 @@ The objective of this project is to test different architectures to compare two 
   - `ResNet.py`: condtains ResNet model
   - `Siamese.py`: condtains SiameseNet model
 - `helpers.py`: contains helper functions for training and testing
-- `test.py`: run to traininng the four models. 
+- `test.py`: run to traininng the four models. It will training each models for 11 rounds and 25 epochs in each round.  
+Mean loss and accucy and its standard deviation will print at the end for three cases: simple structure, structure with weight sharing and auxiliary loss. 
 
   
 ## Getting Started
-- Run `test.py` to train the four models. It will training each models for 11 rounds and 25 epochs in each round. Mean loss and accucy and its standard deviation will print at the end for three cases: simple structure, structure with weight sharing and auxiliary loss. If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
+- Run `test.py` to train the four models.  
+If you want to test cross validation to check learning rate for four models, please reset the boolean flag - 'run_cross_validation' varaible to true. 
 
