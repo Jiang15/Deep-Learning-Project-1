@@ -11,7 +11,7 @@ The objective of this project is to test different architectures to compare two 
 
 ### Folders and Files
 - `models`:
-  -- `FNN.py`: contains FNN model
+  - `FNN.py`: contains FNN model
   - `RCNN.py`: contains RCNN model
   - `ResNet.py`: condtains ResNet model
   - `Siamese.py`: condtains SiameseNet model
