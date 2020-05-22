@@ -3,7 +3,7 @@
 | -------------- | ------ |
 | Wei Jiang | 313794  |
 | Minghui Shi | 308209 |
-| Xiaoqi Ma | | 308932 |
+| Xiaoqi Ma |  308932 |
 
 ## Project Description
 The objective of this project is to design a mini “deep learning framework” using only PyTorch’s
