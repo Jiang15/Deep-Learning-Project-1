@@ -168,7 +168,7 @@ def get_train_stats(model, lr, reg, criterion, AL_weight, epochs, trial, batch_s
             else:
                 accuracy_train, accuracy_test, losses_tr, losses_te = train_info
             if auxiliary_loss: # log results
-                pbar.set_postfix(**{"train loss ": losses_tr.item(), "test loss": losses_te.item(),"train acccuracy": accuracy_train,
+                pbar.set_postfix(**{"train loss ": losses_tr.item(), "Test loss": losses_te.item(),"train acccuracy": accuracy_train,
                             "test accuracy": accuracy_test,
                             "train digit accuracy ": acc_train_digit,
                             "test digit accuracy ": acc_test_digit})
@@ -204,7 +204,7 @@ def cross_validation(k_fold, lr_set, reg_set, gamma_set, model, criterion, AL_we
     :param weight_sharing: boolean flag for applying weight sharing
     :param auxiliary_loss: boolean flag for applying auxiliary loss
     :print best lr, best reg, best gamma (all based on maximum validation accuracy),
-    set of training loss, set of test loss, set of primary task training accuracy, set of primary task test accuracy
+    set of training loss, set of validation loss, set of primary task training accuracy, set of primary task validation accuracy
     (all across hyperparameters tested)
     """
     nb_channels = 2
