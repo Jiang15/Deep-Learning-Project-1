@@ -1,10 +1,10 @@
 import logging
 import torch
-from Project2.layers import Linear, Relu, Tanh
-from Project2.loss_func import MSELoss
-from Project2.optimizers import SGD
-from Project2.Sequential import Sequential
-from Project2.helpers import normalize, generate_disc_set, train, cross_validation, one_hot_encoding
+from model.layers import Linear, Relu, Tanh
+from model.loss_func import MSELoss
+from model.optimizers import SGD
+from model.Sequential import Sequential
+from helpers import normalize, generate_disc_set, train, cross_validation, one_hot_encoding
 
 torch.manual_seed(0)
 # Generate training and test data sets and normalize
